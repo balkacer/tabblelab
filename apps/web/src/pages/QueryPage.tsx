@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { api } from '../api/client'
 import { useConnectionStore } from '../store/connection.store'
+import { ResultTable } from '../components/ResultTable'
 
 export function QueryPage() {
   const connectionId = useConnectionStore((s) => s.connectionId)
@@ -42,11 +43,7 @@ export function QueryPage() {
         Run
       </button>
 
-      {result && (
-        <div className="bg-neutral-900 p-4 rounded overflow-auto">
-          <pre>{JSON.stringify(result, null, 2)}</pre>
-        </div>
-      )}
+      {result && <ResultTable data={result} />}
     </div>
   )
 }
