@@ -1,8 +1,10 @@
 {
     "cSpell.words": [
         "ciphertext",
+        "schemaname",
         "Tabble",
-        "TABBLELAB"
+        "TABBLELAB",
+        "tablename"
     ],
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
