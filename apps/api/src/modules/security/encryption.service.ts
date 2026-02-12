@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, InternalServerErrorException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { randomBytes, createCipheriv, createDecipheriv } from 'crypto'
 import { EncryptedData } from './encryption.types'
@@ -12,13 +12,13 @@ export class EncryptionService {
     const masterKey = this.configService.get<string>('TABBLELAB_MASTER_KEY')
 
     if (!masterKey) {
-      throw new Error('TABBLELAB_MASTER_KEY is not defined')
+      throw new InternalServerErrorException('TABBLELAB_MASTER_KEY is not defined')
     }
 
     this.key = Buffer.from(masterKey, 'base64')
 
     if (this.key.length !== 32) {
-      throw new Error(
+      throw new InternalServerErrorException(
         'TABBLELAB_MASTER_KEY must be 32 bytes (base64 encoded)',
       )
     }

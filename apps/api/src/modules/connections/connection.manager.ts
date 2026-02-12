@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { randomUUID } from 'crypto'
 import {
     PostgresConnectionConfig,
@@ -26,7 +26,7 @@ export class ConnectionManager {
                 driver = new PostgresDriver(config)
                 break
             default:
-                throw new Error('Unsupported database type')
+                throw new BadRequestException('Unsupported database type')
         }
 
         await driver.connect()
@@ -46,7 +46,7 @@ export class ConnectionManager {
         const connection = this.connections.get(connectionId)
 
         if (!connection) {
-            throw new Error('Connection not found')
+            throw new NotFoundException('Connection not found')
         }
 
         return connection.driver
@@ -56,7 +56,7 @@ export class ConnectionManager {
         const connection = this.connections.get(connectionId)
 
         if (!connection) {
-            throw new Error('Connection not found')
+            throw new NotFoundException('Connection not found')
         }
 
         await connection.driver.disconnect()

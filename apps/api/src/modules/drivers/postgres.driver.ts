@@ -4,6 +4,7 @@ import {
     QueryOptions,
     QueryResult,
 } from '@tabblelab/database-core'
+import { BadRequestException } from '@nestjs/common'
 
 export class PostgresDriver implements DatabaseDriver {
     private pool!: Pool
@@ -34,6 +35,12 @@ export class PostgresDriver implements DatabaseDriver {
         sql: string,
         options?: QueryOptions,
     ): Promise<QueryResult> {
+        if (!sql.trim().toLowerCase().startsWith('select')) {
+            throw new BadRequestException(
+                'Only SELECT statements are allowed in safe mode',
+            )
+        }
+
         const start = Date.now()
 
         const rowLimit = options?.rowLimit ?? 1000
