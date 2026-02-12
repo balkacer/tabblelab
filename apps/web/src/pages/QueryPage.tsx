@@ -5,24 +5,40 @@ import { IdeLayout } from '../layout/IdeLayout'
 import { Sidebar } from '../components/Sidebar'
 import { ResultTable } from '../components/ResultTable'
 import { SqlEditor } from '../components/SqlEditor'
+import { useSqlStore } from '../store/sql.store'
 
 export function QueryPage() {
     const connectionId = useConnectionStore((s) => s.connectionId)
 
-    const [sql, setSql] = useState('SELECT NOW();')
+    const sql = useSqlStore((s) => s.sql)
+    const setSql = useSqlStore((s) => s.setSql)
+    const appendSql = useSqlStore((s) => s.appendSql)
+
+    const quoteIdent = (value: string) => `"${value.replaceAll('"', '""')}"`
+    const tableRef = (schema: string, table: string) =>
+        `${quoteIdent(schema)}.${quoteIdent(table)}`
+    const columnRef = (schema: string, table: string, column: string) =>
+        `${quoteIdent(schema)}.${quoteIdent(table)}.${quoteIdent(column)}`
+
     const [result, setResult] = useState<any>(null)
 
     const runQuery = async () => {
-        const res = await api.post(`/connections/${connectionId}/query`, {
-            sql,
-        })
-
+        const res = await api.post(`/connections/${connectionId}/query`, { sql })
         setResult(res.data)
     }
 
     return (
         <IdeLayout
-            sidebar={<Sidebar />}
+            sidebar={
+                <Sidebar
+                    onSelectTable={(schema, table) => {
+                        setSql(`SELECT * FROM ${tableRef(schema, table)} LIMIT 100`)
+                    }}
+                    onInsertColumn={(schema, table, column) => {
+                        appendSql(columnRef(schema, table, column))
+                    }}
+                />
+            }
             editor={
                 <div className="p-4 flex-1 min-h-0 flex flex-col">
                     <div className="flex justify-between items-center mb-2">
@@ -35,9 +51,9 @@ export function QueryPage() {
                             className="bg-green-600 hover:bg-green-700 px-4 py-1 rounded text-sm flex items-center gap-2"
                         >
                             Run
-                            <span className="text-xs text-green-200 opacity-70">
+                            {/* <span className="text-xs text-green-200 opacity-70">
                                 ⌘ ↵
-                            </span>
+                            </span> */}
                         </button>
                     </div>
 

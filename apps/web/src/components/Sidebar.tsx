@@ -20,6 +20,7 @@ function NodeButton({
   indent = 0,
   kind,
   title,
+  iconOverride,
 }: {
   open?: boolean
   label: React.ReactNode
@@ -27,17 +28,19 @@ function NodeButton({
   indent?: number
   kind: 'connection' | 'schema' | 'table' | 'column'
   title?: string
+  iconOverride?: React.ReactNode
 }) {
   const padding = 8 + indent * 14
 
   const icon =
-    kind === 'connection'
+    iconOverride ??
+    (kind === 'connection'
       ? '🧪'
       : kind === 'schema'
         ? '🗂️'
         : kind === 'table'
           ? '📄'
-          : '🔹'
+          : '🔹')
 
   return (
     <button
@@ -54,7 +57,13 @@ function NodeButton({
   )
 }
 
-export function Sidebar() {
+export function Sidebar({
+  onSelectTable,
+  onInsertColumn,
+}: {
+  onSelectTable?: (schema: string, table: string) => void
+  onInsertColumn?: (schema: string, table: string, column: string) => void
+}) {
   const connectionId = useConnectionStore((s) => s.connectionId)
   const clearConnection = useConnectionStore((s) => s.clearConnection)
 
@@ -161,6 +170,8 @@ export function Sidebar() {
                           onToggle={() =>
                             setOpenTables((prev) => ({ ...prev, [key]: !tableOpen }))
                           }
+                          onSelectTable={onSelectTable}
+                          onInsertColumn={onInsertColumn}
                         />
                       )
                     })}
@@ -182,6 +193,8 @@ function TableNode({
   open,
   indent,
   onToggle,
+  onSelectTable,
+  onInsertColumn,
 }: {
   connectionId: string
   schema: string
@@ -189,6 +202,8 @@ function TableNode({
   open: boolean
   indent: number
   onToggle: () => void
+  onSelectTable?: (schema: string, table: string) => void
+  onInsertColumn?: (schema: string, table: string, column: string) => void
 }) {
   const { data: columns = [], isFetching } = useQuery({
     queryKey: ['columns', connectionId, schema, table],
@@ -204,7 +219,10 @@ function TableNode({
         open={open}
         indent={indent}
         label={table}
-        onClick={onToggle}
+        onClick={() => {
+          onToggle()
+          onSelectTable?.(schema, table)
+        }}
         title={`${schema}.${table}`}
       />
 
@@ -262,30 +280,29 @@ function TableNode({
                           🔒
                         </span>
                       ) : null}
-
-                      {/* primary key */}
-                      {c.isPrimaryKey ? (
+                      {/* nullable */}
+                      {c.isNullable ? (
                         <span
-                          title="PRIMARY KEY"
+                          title="NULLABLE"
                           className="inline-flex w-5 justify-center"
                         >
-                          🔑
-                        </span>
-                      ) : null}
-
-                      {/* foreign key */}
-                      {c.isForeignKey ? (
-                        <span
-                          title="FOREIGN KEY"
-                          className="inline-flex w-5 justify-center"
-                        >
-                          🔗
+                          🔓
                         </span>
                       ) : null}
                     </span>
                   </span>
                 }
+                onClick={() => {
+                  onInsertColumn?.(schema, table, c.name)
+                }}
                 title={`${schema}.${table}.${c.name} • ${c.dataType}${c.isNullable ? '' : ' • NOT NULL'}${c.isPrimaryKey ? ' • PK' : ''}${c.isForeignKey ? ' • FK' : ''}`}
+                iconOverride={
+                  c.isPrimaryKey
+                    ? '🔑'
+                    : c.isForeignKey
+                      ? '🔗'
+                      : '🔹'
+                }
               />
             )
           })}
