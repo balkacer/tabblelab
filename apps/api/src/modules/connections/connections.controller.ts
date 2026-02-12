@@ -53,4 +53,20 @@ export class ConnectionsController {
 
         return result
     }
+
+    @Get(':id/tables')
+    async tables(@Param('id') id: string) {
+        const driver: any = this.connectionManager.getDriver(id)
+        return driver.getTables()
+    }
+
+    @Get(':id/tables/:schema/:table/columns')
+    async columns(
+        @Param('id') id: string,
+        @Param('schema') schema: string,
+        @Param('table') table: string,
+    ) {
+        const driver: any = this.connectionManager.getDriver(id)
+        return driver.getColumns(schema, table)
+    }
 }

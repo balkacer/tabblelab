@@ -32,14 +32,17 @@ export function QueryPage() {
 
                         <button
                             onClick={runQuery}
-                            className="bg-green-600 hover:bg-green-700 px-4 py-1 rounded text-sm"
+                            className="bg-green-600 hover:bg-green-700 px-4 py-1 rounded text-sm flex items-center gap-2"
                         >
                             Run
+                            <span className="text-xs text-green-200 opacity-70">
+                                ⌘ ↵
+                            </span>
                         </button>
                     </div>
 
                     <div className="flex-1 min-h-0 rounded overflow-hidden border border-neutral-800 bg-neutral-950">
-                        <SqlEditor value={sql} onChange={setSql} />
+                        <SqlEditor value={sql} onChange={setSql} onRun={runQuery} />
                     </div>
                 </div>
             }

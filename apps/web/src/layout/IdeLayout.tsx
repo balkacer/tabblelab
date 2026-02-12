@@ -14,7 +14,7 @@ export function IdeLayout({
     return (
         <div className="h-screen flex bg-neutral-950 text-white overflow-hidden">
             {/* Sidebar */}
-            <div className="w-60 border-r border-neutral-800 bg-neutral-900 overflow-auto">
+            <div className="w-70 border-r border-neutral-800 bg-neutral-900 overflow-auto">
                 {sidebar}
             </div>
 

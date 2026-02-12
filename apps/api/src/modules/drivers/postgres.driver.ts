@@ -73,13 +73,77 @@ export class PostgresDriver implements DatabaseDriver {
         }
     }
 
-    async getTables(): Promise<string[]> {
+    async getTables(): Promise<{ schema: string; name: string }[]> {
         const result = await this.pool.query(`
-      SELECT tablename
-      FROM pg_catalog.pg_tables
-      WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
-    `)
+    SELECT table_schema AS schema, table_name AS name
+    FROM information_schema.tables
+    WHERE table_type = 'BASE TABLE'
+      AND table_schema NOT IN ('pg_catalog', 'information_schema')
+    ORDER BY table_schema, table_name;
+  `)
 
-        return result.rows.map((r) => r.tablename)
+        return result.rows
+    }
+
+    async getColumns(
+        schema: string,
+        table: string,
+    ): Promise<
+        {
+            name: string
+            dataType: string
+            isNullable: boolean
+            isPrimaryKey: boolean
+            isForeignKey: boolean
+        }[]
+    > {
+        const result = await this.pool.query(
+            `
+      WITH cols AS (
+        SELECT
+          c.column_name AS name,
+          c.data_type AS "dataType",
+          (c.is_nullable = 'YES') AS "isNullable",
+          c.ordinal_position
+        FROM information_schema.columns c
+        WHERE c.table_schema = $1 AND c.table_name = $2
+      ),
+      pk AS (
+        SELECT kcu.column_name AS name
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.key_column_usage kcu
+          ON tc.constraint_name = kcu.constraint_name
+         AND tc.table_schema = kcu.table_schema
+         AND tc.table_name = kcu.table_name
+        WHERE tc.constraint_type = 'PRIMARY KEY'
+          AND tc.table_schema = $1
+          AND tc.table_name = $2
+      ),
+      fk AS (
+        SELECT kcu.column_name AS name
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.key_column_usage kcu
+          ON tc.constraint_name = kcu.constraint_name
+         AND tc.table_schema = kcu.table_schema
+         AND tc.table_name = kcu.table_name
+        WHERE tc.constraint_type = 'FOREIGN KEY'
+          AND tc.table_schema = $1
+          AND tc.table_name = $2
+      )
+      SELECT
+        cols.name,
+        cols."dataType",
+        cols."isNullable",
+        (pk.name IS NOT NULL) AS "isPrimaryKey",
+        (fk.name IS NOT NULL) AS "isForeignKey"
+      FROM cols
+      LEFT JOIN pk ON pk.name = cols.name
+      LEFT JOIN fk ON fk.name = cols.name
+      ORDER BY cols.ordinal_position;
+      `,
+            [schema, table],
+        )
+
+        return result.rows
     }
 }
