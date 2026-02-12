@@ -149,7 +149,7 @@ You can help with:
 - Documentation
 - Testing
 
-Please read CONTRIBUTING.md before submitting a PR.
+Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before submitting a PR.
 
 ## 📜 License
 
