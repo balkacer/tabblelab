@@ -18,6 +18,7 @@ We aim to build a welcoming and inclusive community. Harassment, discrimination 
 You can contribute in multiple ways:
 
 ### 🐛 Report Bugs
+
 - Open a GitHub Issue
 - Clearly describe:
   - What happened
@@ -26,6 +27,7 @@ You can contribute in multiple ways:
   - Screenshots (if applicable)
 
 ### 💡 Suggest Features
+
 - Check existing issues first
 - Clearly explain the problem the feature solves
 - Avoid feature bloat — TabbleLab prioritizes clarity and minimalism
@@ -81,6 +83,7 @@ pnpm dev:web
 ## 🎯 Development Guidelines
 
 ### Code Style
+
 - TypeScript everywhere
 - Strict typing enabled
 - Avoid any
@@ -90,6 +93,7 @@ pnpm dev:web
 ### UI Principles
 
 TabbleLab is:
+
 - Minimal
 - Modern
 - Fast
@@ -103,6 +107,7 @@ Every feature must justify its existence.
 Security is a top priority.
 
 When contributing:
+
 - Never log credentials
 - Respect query timeouts
 - Respect row limits
@@ -122,6 +127,7 @@ packages/database-core
 ```
 
 Each driver must:
+
 - Handle connection lifecycle
 - Support timeout
 - Support cancellation (if possible)
@@ -134,6 +140,7 @@ We encourage community-driven drivers.
 Use clear and descriptive commits.
 
 Recommended format:
+
 ```
 feat: add MySQL driver support
 fix: prevent multiple statement execution
@@ -144,6 +151,7 @@ docs: update README
 ## 🧭 Pull Request Checklist
 
 Before submitting a PR, ensure:
+
 - Code builds without errors
 - No TypeScript warnings
 - Feature matches project vision
@@ -162,6 +170,7 @@ We want to grow intentionally — not chaotically.
 ## 🧑‍🚀 First-Time Contributors
 
 Look for issues labeled:
+
 - good first issue
 - help wanted
 - documentation

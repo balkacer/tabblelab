@@ -1,0 +1,28 @@
+{
+  "name": "tabblelab",
+  "private": true,
+  "version": "0.0.1",
+  "description": "The open-source SQL lab for modern developers.",
+  "license": "MIT",
+  "packageManager": "pnpm@10.29.3+sha512.498e1fb4cca5aa06c1dcf2611e6fafc50972ffe7189998c409e90de74566444298ffe43e6cd2acdc775ba1aa7cc5e092a8b7054c811ba8c5770f84693d33d2dc",
+  "scripts": {
+    "dev:api": "pnpm --filter api dev",
+    "dev:web": "pnpm --filter web dev",
+    "build": "pnpm -r build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "eslint": "catalog:",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "typescript-eslint": "^8.55.0",
+    "vite-tsconfig-paths": "^6.1.1"
+  }
+}

@@ -25,6 +25,7 @@ Built for developers who want speed, clarity and control.
 ## 🚀 Why TabbleLab?
 
 Traditional database tools are:
+
 - Heavy
 - Local-only
 - Not collaborative
@@ -57,6 +58,7 @@ TabbleLab is designed with safety in mind:
 ## 🏗 Architecture
 
 TabbleLab follows a modular architecture:
+
 ```
 ├── apps/
 │   ├── web/        → Frontend (React + TypeScript)
@@ -70,9 +72,11 @@ TabbleLab follows a modular architecture:
 The database engine is built around a driver interface, allowing easy support for additional databases.
 
 Currently supported:
+
 - PostgreSQL
 
 Planned:
+
 - MySQL
 - MSSQL
 - SQLite
@@ -97,6 +101,7 @@ http://localhost:3000
 ## 🛠 Development
 
 **Requirements**
+
 - Node.js 20+
 - pnpm
 - Docker (optional)
@@ -122,17 +127,20 @@ pnpm dev:web
 ## 🗺 Roadmap
 
 **v0.1**
+
 - PostgreSQL support
 - SQL editor
 - Schema explorer
 - Query execution
 
 **v0.2**
+
 - MySQL & MSSQL
 - Saved queries
 - Multi-connection management
 
 **v0.3**
+
 - Roles & permissions
 - Query insights
 - Execution plan visualizer
@@ -142,6 +150,7 @@ pnpm dev:web
 We welcome contributions from developers of all levels.
 
 You can help with:
+
 - Database drivers
 - UI improvements
 - Performance optimizations
@@ -165,6 +174,7 @@ but a laboratory for exploring and understanding data.
 ## ⭐ Support the Project
 
 If you find TabbleLab useful:
+
 - ⭐ Star the repository
 - 🐛 Report issues
 - 🧠 Suggest improvements

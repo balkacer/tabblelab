@@ -10,9 +10,9 @@ we take vulnerabilities extremely seriously.
 We currently provide security updates for:
 
 | Version | Supported |
-|----------|------------|
-| v0.x     | ✅ Yes     |
-| < v0.x   | ❌ No      |
+| ------- | --------- |
+| v0.x    | ✅ Yes    |
+| < v0.x  | ❌ No     |
 
 Only the latest minor version is actively maintained.
 
@@ -39,24 +39,29 @@ You will receive a response within **72 hours**.
 TabbleLab follows these core principles:
 
 ### 1️⃣ Secure by Default
+
 - Query timeout enabled
 - Row limits enabled
 - No multi-statement execution by default
 - Optional Safe Mode (blocks destructive statements)
 
 ### 2️⃣ No Plain-Text Credential Storage
+
 Database credentials must:
+
 - Be encrypted at rest
 - Never be logged
 - Never be exposed to the frontend
 
 ### 3️⃣ Controlled Query Execution
+
 - Queries must respect execution time limits
 - Queries must respect row limits
 - Cancellation must be supported when possible
 - Destructive statements may be restricted in Safe Mode
 
 ### 4️⃣ Minimal Attack Surface
+
 - No unnecessary exposed endpoints
 - Input validation on all API routes
 - Strong typing (TypeScript strict mode)
@@ -67,6 +72,7 @@ Database credentials must:
 TabbleLab is designed to be self-hosted.
 
 Users are responsible for:
+
 - Securing their infrastructure
 - Configuring network access to databases
 - Managing environment variables securely
@@ -102,6 +108,7 @@ Security concerns include (but are not limited to):
 TabbleLab uses automated dependency scanning.
 
 Contributors must:
+
 - Avoid introducing vulnerable packages
 - Prefer well-maintained libraries
 - Justify large or security-sensitive dependencies
@@ -111,6 +118,7 @@ Contributors must:
 We believe in responsible disclosure.
 
 We ask researchers to:
+
 - Give us reasonable time to fix issues
 - Avoid public disclosure before a patch is available
 - Act in good faith
