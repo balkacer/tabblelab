@@ -103,11 +103,11 @@ Every feature must justify its existence.
 Security is a top priority.
 
 When contributing:
-	•	Never log credentials
-	•	Respect query timeouts
-	•	Respect row limits
-	•	Avoid introducing unsafe SQL execution patterns
-	•	Discuss changes affecting query execution before implementing
+- Never log credentials
+- Respect query timeouts
+- Respect row limits
+- Avoid introducing unsafe SQL execution patterns
+- Discuss changes affecting query execution before implementing
 
 If you discover a security vulnerability:
 Please do **NOT** open a public issue.
