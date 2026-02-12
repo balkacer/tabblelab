@@ -6,7 +6,7 @@ function App() {
   const connectionId = useConnectionStore((s) => s.connectionId)
 
   return (
-    <div className="h-screen bg-neutral-950 text-white">
+    <div className="h-screen bg-neutral-950 text-white overflow-hidden">
       {connectionId ? <QueryPage /> : <ConnectionPage />}
     </div>
   )
