@@ -2,10 +2,12 @@ import 'reflect-metadata'
 import { NestFactory } from '@nestjs/core'
 import { ValidationPipe } from '@nestjs/common'
 import { AppModule } from './app.module'
-import { GlobalExceptionFilter } from './common/filters/http-exception.filter'
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
+
+  app.useGlobalFilters(new GlobalExceptionFilter())
 
   const allowedOrigins = [
     'http://localhost:5173',
@@ -29,8 +31,6 @@ async function bootstrap() {
       transform: true,
     }),
   )
-
-  app.useGlobalFilters(new GlobalExceptionFilter())
 
   const port = Number(process.env.PORT ?? 4000)
   await app.listen(port, '0.0.0.0')

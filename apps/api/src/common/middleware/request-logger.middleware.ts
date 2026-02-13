@@ -41,6 +41,8 @@ export class RequestLoggerMiddleware implements NestMiddleware {
             })
         })
 
+        res.setHeader('x-request-id', requestId)
+
         next()
     }
 }
