@@ -40,7 +40,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"type\": \"postgres\",\n  \"host\": \"{{dbHost}}\",\n  \"port\": 5432,\n  \"database\": \"postgres\",\n  \"user\": \"postgres\",\n  \"password\": \"{{dbPassword}}\",\n  \"ssl\": false\n}",
+          "raw": "{\n  \"type\": \"postgres\",\n  \"host\": \"{{dbHost}}\",\n  \"port\": {{dbPort}},\n  \"database\": \"{{dbName}}\",\n  \"user\": \"{{dbUser}}\",\n  \"password\": \"{{dbPassword}}\",\n  \"ssl\": false\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -104,13 +104,39 @@
     },
     {
       "name": "query",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "af8dbe5c-3d90-4617-a835-d0b007d64b6e",
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "id": "b629d790-dee7-4106-a37a-9c4435e91621",
+            "exec": [
+              "pm.environment.set(\"queryId\", pm.response.json().queryId);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "id": "b9143619-aada-48d7-bc88-01c0e96ef1d9",
       "request": {
         "method": "POST",
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"sql\": \"SELECT * FROM \\\"public\\\".\\\"users\\\" LIMIT 100\"\n}",
+          "raw": "{\n  \"sql\": \"SELECT NOW() AS current_time\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -199,28 +225,90 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "cancel-query",
+      "id": "3938a7d5-98b9-4ba3-b9ba-99c541439184",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sql\": \"SELECT NOW() AS current_time\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/connections/:id/query/:queryId/cancel",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "connections",
+            ":id",
+            "query",
+            ":queryId",
+            "cancel"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "{{connectionId}}"
+            },
+            {
+              "key": "queryId",
+              "value": "{{queryId}}",
+              "uuid": "94c77eb4-b9a4-448b-90cf-d478c71ec9d5"
+            }
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "variable": [
     {
-      "id": "82559afc-3c33-4c7f-bee1-4d4c17249600",
+      "id": "5b386f9f-badc-4e7c-843a-f8040a9020ad",
       "key": "baseURL",
-      "value": "https://0.0.0.0:4000"
+      "value": "http://0.0.0.0:4000"
     },
     {
-      "id": "7a8ec2a3-7eec-40bb-8c56-6b0403a2961f",
+      "id": "064c3256-22f2-43ab-a71d-95fc7f0d9722",
       "key": "connectionId",
       "value": "1"
     },
     {
-      "id": "38f77dcb-be99-469a-9c52-29f5b2a42373",
+      "id": "fb79e632-9e2a-4239-bf90-e0a44054d9a8",
       "key": "dbPassword",
-      "value": "ANraOyl28RVTWJSO"
+      "value": "postgres"
     },
     {
-      "id": "2f088c54-4475-48e9-99ae-4047a4ec43fc",
+      "id": "55874ae8-88e0-4c56-a011-de3d28599438",
       "key": "dbHost",
-      "value": "db.zltchkcgbqcmrpqowqii.supabase.co"
+      "value": "db"
+    },
+    {
+      "id": "41316839-46c7-4d34-b699-c638795b74a7",
+      "key": "dbName",
+      "value": "tabblelab"
+    },
+    {
+      "id": "6a575afb-fb66-4a06-a2b5-8b9951943fae",
+      "key": "dbPort",
+      "value": "5432"
+    },
+    {
+      "id": "204823dc-e83c-4dc2-9917-172df6e9cba8",
+      "key": "dbUser",
+      "value": "postgres"
+    },
+    {
+      "id": "6b3b7838-946a-4ce4-b662-31cca64dece1",
+      "key": "queryId",
+      "value": "1"
     }
   ]
 }
