@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { api } from '../api/client'
 import { useConnectionStore } from '../store/connection.store'
 import { IdeLayout } from '../layout/IdeLayout'
@@ -23,37 +23,60 @@ export function QueryPage() {
     const [result, setResult] = useState<any>(null)
     const [isRunning, setIsRunning] = useState(false)
     const [activeQueryId, setActiveQueryId] = useState<string | null>(null)
-    const [runToken, setRunToken] = useState(0)
+    const runTokenRef = useRef<number>(0)
+    const abortRef = useRef<AbortController | null>(null)
 
     const runQuery = async () => {
+        if (!connectionId) return
+
         const token = Date.now()
-        setRunToken(token)
+        runTokenRef.current = token
+
+        // Abort any previous in-flight request (if any)
+        abortRef.current?.abort()
+
+        const controller = new AbortController()
+        abortRef.current = controller
 
         setIsRunning(true)
         setActiveQueryId(null)
 
         try {
-            const res = await api.post(`/connections/${connectionId}/query`, { sql })
+            const res = await api.post(
+                `/connections/${connectionId}/query`,
+                { sql },
+                { signal: controller.signal },
+            )
 
-            // Si se lanzó otra query o se canceló y relanzó, ignoramos este resultado
-            if (runToken !== 0 && token !== runToken) return
+            // Ignore late responses from older runs
+            if (runTokenRef.current !== token) return
 
             setResult(res.data)
             setActiveQueryId(res.data.queryId ?? null)
+        } catch (err: any) {
+            // If user cancelled the request, just exit quietly
+            if (err?.name === 'CanceledError' || err?.code === 'ERR_CANCELED') return
+            throw err
         } finally {
-            // Solo apaga running si sigue siendo el mismo run
-            if (token === runToken || runToken === 0) setIsRunning(false)
+            // Only clear running state if this run is still the latest
+            if (runTokenRef.current === token) {
+                setIsRunning(false)
+                abortRef.current = null
+            }
         }
     }
 
     const cancelQuery = async () => {
-        if (!connectionId || !activeQueryId) return
+        // 1) Abort the in-flight HTTP request (so UI unlocks immediately)
+        abortRef.current?.abort()
+        setIsRunning(false)
 
+        // 2) If we have a server-side queryId, request DB cancellation too
+        if (!connectionId || !activeQueryId) return
         try {
             await api.post(`/connections/${connectionId}/query/${activeQueryId}/cancel`)
-        } finally {
-            // UI: asumimos cancel solicitado
-            setIsRunning(false)
+        } catch {
+            // ignore
         }
     }
 
@@ -87,9 +110,9 @@ export function QueryPage() {
 
                             <button
                                 onClick={cancelQuery}
-                                disabled={!isRunning || !activeQueryId}
+                                disabled={!isRunning}
                                 className="bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50 px-4 py-1 rounded text-sm"
-                                title={!activeQueryId ? 'No active queryId yet' : 'Cancel running query'}
+                                title={activeQueryId ? 'Cancel running query' : 'Stop the running request (queryId not available yet)'}
                             >
                                 Cancel
                             </button>
