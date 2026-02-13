@@ -5,9 +5,11 @@ import {
     QueryResult,
 } from '@tabblelab/database-core'
 import { BadRequestException } from '@nestjs/common'
+import { randomUUID } from 'crypto'
 
 export class PostgresDriver implements DatabaseDriver {
     private pool!: Pool
+    private activeQueries = new Map<string, { pid: number; startedAt: number }>()
 
     constructor(private readonly config: {
         host: string
@@ -17,6 +19,23 @@ export class PostgresDriver implements DatabaseDriver {
         password: string
         ssl?: boolean
     }) { }
+
+    private normalizeSql(sql: string) {
+        return sql.trim().replace(/;+\s*$/, '')
+    }
+
+    private enforceSelectOnly(sql: string) {
+        const s = sql.trim().toLowerCase()
+        if (!s.startsWith('select') && !s.startsWith('with')) {
+            // WITH ... SELECT
+            throw new BadRequestException('Only SELECT statements are allowed in safe mode')
+        }
+    }
+
+    private applyRowLimit(sql: string, limit: number) {
+        const clean = this.normalizeSql(sql)
+        return `SELECT * FROM (${clean}) AS __tabblelab_sub LIMIT ${limit}`
+    }
 
     async connect(): Promise<void> {
         this.pool = new Pool({
@@ -33,42 +52,59 @@ export class PostgresDriver implements DatabaseDriver {
 
     async query(
         sql: string,
-        options?: QueryOptions,
-    ): Promise<QueryResult> {
-        if (!sql.trim().toLowerCase().startsWith('select')) {
-            throw new BadRequestException(
-                'Only SELECT statements are allowed in safe mode',
-            )
-        }
+        opts?: { timeoutMs?: number; rowLimit?: number },
+    ): Promise<{
+        queryId: string
+        columns: string[]
+        rows: Record<string, any>[]
+        rowCount: number
+        executionTimeMs: number
+    }> {
+        const started = Date.now()
 
-        const start = Date.now()
+        // defaults/env
+        const defaultTimeoutMs = Number(process.env.TABBLELAB_DEFAULT_TIMEOUT_MS ?? 8000)
+        const maxRowLimit = Number(process.env.TABBLELAB_MAX_ROW_LIMIT ?? 1000)
+        const safeMode = String(process.env.TABBLELAB_SAFE_MODE ?? 'true') === 'true'
 
-        const rowLimit = options?.rowLimit ?? 1000
-        const timeoutMs = options?.timeoutMs ?? 10000
+        const timeoutMs = Math.max(1, opts?.timeoutMs ?? defaultTimeoutMs)
+        const requestedLimit = opts?.rowLimit ?? maxRowLimit
+        const rowLimit = Math.min(Math.max(1, requestedLimit), maxRowLimit)
+
+        const cleanSql = this.normalizeSql(sql)
+
+        if (safeMode) this.enforceSelectOnly(cleanSql)
+
+        const limitedSql = this.applyRowLimit(cleanSql, rowLimit)
 
         const client = await this.pool.connect()
+        const queryId = randomUUID()
 
         try {
-            await client.query(`SET statement_timeout TO ${timeoutMs}`)
+            // get pid and track
+            const pidRes = await client.query<{ pid: number }>('SELECT pg_backend_pid() as pid')
+            const pid = pidRes.rows[0]?.pid
+            if (pid) this.activeQueries.set(queryId, { pid, startedAt: started })
 
-            const limitedSql = `
-        SELECT * FROM (
-          ${sql}
-        ) as tabblelab_subquery
-        LIMIT ${rowLimit}
-      `
-
-            const result = await client.query(limitedSql)
-
-            const executionTimeMs = Date.now() - start
+            await client.query('BEGIN')
+            await client.query(`SET LOCAL statement_timeout = ${timeoutMs}`)
+            const res = await client.query(limitedSql)
+            await client.query('COMMIT')
 
             return {
-                columns: result.fields.map((f) => f.name),
-                rows: result.rows,
-                rowCount: result.rowCount ?? 0,
-                executionTimeMs,
+                queryId,
+                columns: res.fields.map((f) => f.name),
+                rows: res.rows,
+                rowCount: res.rowCount ?? res.rows.length,
+                executionTimeMs: Date.now() - started,
             }
+        } catch (e) {
+            try {
+                await client.query('ROLLBACK')
+            } catch { }
+            throw e
         } finally {
+            this.activeQueries.delete(queryId)
             client.release()
         }
     }
@@ -145,5 +181,14 @@ export class PostgresDriver implements DatabaseDriver {
         )
 
         return result.rows
+    }
+
+    async cancelQuery(queryId: string): Promise<boolean> {
+        const info = this.activeQueries.get(queryId)
+        if (!info) return false
+
+        // cancelar desde otro client
+        const res = await this.pool.query('SELECT pg_cancel_backend($1) AS cancelled', [info.pid])
+        return !!res.rows?.[0]?.cancelled
     }
 }

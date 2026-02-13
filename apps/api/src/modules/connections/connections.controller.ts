@@ -56,7 +56,7 @@ export class ConnectionsController {
 
     @Get(':id/tables')
     async tables(@Param('id') id: string) {
-        const driver: any = this.connectionManager.getDriver(id)
+        const driver = this.connectionManager.getDriver(id)
         return driver.getTables()
     }
 
@@ -66,7 +66,17 @@ export class ConnectionsController {
         @Param('schema') schema: string,
         @Param('table') table: string,
     ) {
-        const driver: any = this.connectionManager.getDriver(id)
+        const driver = this.connectionManager.getDriver(id)
         return driver.getColumns(schema, table)
+    }
+
+    @Post(':id/query/:queryId/cancel')
+    async cancel(
+        @Param('id') id: string,
+        @Param('queryId') queryId: string,
+    ) {
+        const driver = this.connectionManager.getDriver(id)
+        const cancelled = await driver.cancelQuery(queryId)
+        return { cancelled }
     }
 }

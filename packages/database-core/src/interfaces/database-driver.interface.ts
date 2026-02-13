@@ -16,4 +16,5 @@ export interface DatabaseDriver {
     query(sql: string, options?: QueryOptions): Promise<QueryResult>
     getTables(): Promise<{ schema: string; name: string }[]>
     getColumns(schema: string, table: string): Promise<{ name: string; dataType: string; isNullable: boolean, isPrimaryKey: boolean, isForeignKey: boolean }[]>
+    cancelQuery(queryId: string): Promise<boolean>
 }
