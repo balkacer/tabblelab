@@ -6,11 +6,11 @@ export function ConnectionPage() {
   const setConnectionId = useConnectionStore((s) => s.setConnectionId)
 
   const [form, setForm] = useState({
-    host: 'localhost',
+    host: 'db',
     port: 5432,
-    database: 'postgres',
+    database: 'tabblelab',
     user: 'postgres',
-    password: '',
+    password: 'postgres',
   })
 
   const handleConnect = async () => {
