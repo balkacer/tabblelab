@@ -5,7 +5,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-green?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![pnpm](https://img.shields.io/badge/pnpm-Workspace-orange?logo=pnpm&logoColor=white)](https://pnpm.io/)
 [![Docker Ready](https://img.shields.io/badge/Docker-Ready-blue?logo=docker&logoColor=white)](#-quick-start-docker)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supported-blue?logo=postgresql&logoColor=white)](#-features-v0.1---mvp)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supported-blue?logo=postgresql&logoColor=white)](#-features-v01---mvp)
 [![Open Source](https://img.shields.io/badge/Open%20Source-Yes-brightgreen)](#-license)
 [![GitHub Issues](https://img.shields.io/github/issues/balkacer/tabblelab)](https://github.com/balkacer/tabblelab/issues)
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/balkacer/tabblelab)](https://github.com/balkacer/tabblelab/pulls)
