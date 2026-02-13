@@ -21,10 +21,40 @@ export function QueryPage() {
         `${quoteIdent(schema)}.${quoteIdent(table)}.${quoteIdent(column)}`
 
     const [result, setResult] = useState<any>(null)
+    const [isRunning, setIsRunning] = useState(false)
+    const [activeQueryId, setActiveQueryId] = useState<string | null>(null)
+    const [runToken, setRunToken] = useState(0)
 
     const runQuery = async () => {
-        const res = await api.post(`/connections/${connectionId}/query`, { sql })
-        setResult(res.data)
+        const token = Date.now()
+        setRunToken(token)
+
+        setIsRunning(true)
+        setActiveQueryId(null)
+
+        try {
+            const res = await api.post(`/connections/${connectionId}/query`, { sql })
+
+            // Si se lanzó otra query o se canceló y relanzó, ignoramos este resultado
+            if (runToken !== 0 && token !== runToken) return
+
+            setResult(res.data)
+            setActiveQueryId(res.data.queryId ?? null)
+        } finally {
+            // Solo apaga running si sigue siendo el mismo run
+            if (token === runToken || runToken === 0) setIsRunning(false)
+        }
+    }
+
+    const cancelQuery = async () => {
+        if (!connectionId || !activeQueryId) return
+
+        try {
+            await api.post(`/connections/${connectionId}/query/${activeQueryId}/cancel`)
+        } finally {
+            // UI: asumimos cancel solicitado
+            setIsRunning(false)
+        }
     }
 
     return (
@@ -46,15 +76,24 @@ export function QueryPage() {
                             Query Editor
                         </h1>
 
-                        <button
-                            onClick={runQuery}
-                            className="bg-green-600 hover:bg-green-700 px-4 py-1 rounded text-sm flex items-center gap-2"
-                        >
-                            Run
-                            {/* <span className="text-xs text-green-200 opacity-70">
-                                ⌘ ↵
-                            </span> */}
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={runQuery}
+                                disabled={isRunning}
+                                className="bg-green-600 hover:bg-green-700 disabled:opacity-50 px-4 py-1 rounded text-sm"
+                            >
+                                {isRunning ? 'Running…' : 'Run'}
+                            </button>
+
+                            <button
+                                onClick={cancelQuery}
+                                disabled={!isRunning || !activeQueryId}
+                                className="bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50 px-4 py-1 rounded text-sm"
+                                title={!activeQueryId ? 'No active queryId yet' : 'Cancel running query'}
+                            >
+                                Cancel
+                            </button>
+                        </div>
                     </div>
 
                     <div className="flex-1 min-h-0 rounded overflow-hidden border border-neutral-800 bg-neutral-950">
