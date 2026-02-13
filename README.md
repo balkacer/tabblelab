@@ -1,7 +1,12 @@
 # 🧪 TabbleLab
 
-[![Postman Collection](https://img.shields.io/badge/Postman-Collection-orange?logo=postman&logoColor=white)](https://altarlink.postman.co/workspace/CIAM~4d8cfcbb-286f-482d-9c66-f82a9b335d46/collection/30447307-b7ce3cd5-b426-4e84-a06b-816c604e072f?action=share&creator=30447307&active-environment=30447307-28dd5f85-c186-44cc-9971-868c0e9ab618)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Postman Collection](https://img.shields.io/badge/Postman-Collection-orange?logo=postman&logoColor=white)](./postman/collections/TabbleLab%20API.postman_collection.json)
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-green?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![pnpm](https://img.shields.io/badge/pnpm-Workspace-orange?logo=pnpm&logoColor=white)](https://pnpm.io/)
+[![Docker Ready](https://img.shields.io/badge/Docker-Ready-blue?logo=docker&logoColor=white)](#quick-start-docker)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supported-blue?logo=postgresql&logoColor=white)](#features-v01---mvp)
+[![Open Source](https://img.shields.io/badge/Open%20Source-Yes-brightgreen)](#-license)
 [![GitHub Issues](https://img.shields.io/github/issues/balkacer/tabblelab)](https://github.com/balkacer/tabblelab/issues)
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/balkacer/tabblelab)](https://github.com/balkacer/tabblelab/pulls)
 

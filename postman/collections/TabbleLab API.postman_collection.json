@@ -1,0 +1,226 @@
+{
+  "info": {
+    "_postman_id": "b7ce3cd5-b426-4e84-a06b-816c604e072f",
+    "name": "TabbleLab API",
+    "description": "# TabbleLab API Documentation\n\n## Overview\n\nTabbleLab is a database connection and query management API that allows you to create, manage, and query database connections. This API provides endpoints for managing database connections, retrieving table and column information, and executing queries.\n\n## Environment Variables\n\nThe following environment variables are used throughout this collection:\n\n- `baseURL` - The base URL for the API\n    \n- `connectionId` - The ID of the database connection\n    \n- `dbPassword` - Database password for authentication\n    \n- `dbHost` - Database host address\n    \n\n## Getting Started\n\n1. Set up your environment variables in the TabbleLab environment\n    \n2. Create a new database connection using the `create-connection` endpoint\n    \n3. Use the returned `connectionId` to query tables, columns, and execute queries\n    \n4. Manage your connections using the get and delete endpoints\n    \n\n## Common Workflows\n\n- **Setup Connection**: Create a new database connection and store the connectionId\n    \n- **Explore Schema**: Use get-tables and get-columns to understand the database structure\n    \n- **Execute Queries**: Use the query endpoint to run SQL queries against your connection\n    \n- **Cleanup**: Delete connections when no longer needed\n    \n\n## Rate Limits\n\nPlease refer to your API plan for rate limit information.\n\n## Support\n\nFor additional support and documentation, please contact the TabbleLab team.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "create-connection",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "206ad146-fc26-46dc-a88f-de422ed94cab",
+            "exec": [
+              "pm.environment.set(\"connectionId\", pm.response.json().connectionId)"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "0d9c9b81-7bce-4bc1-acd4-ed16e2b57e0e",
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "id": "d2ad5c50-50f2-4b98-a3e5-9c334cd574eb",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"postgres\",\n  \"host\": \"{{dbHost}}\",\n  \"port\": 5432,\n  \"database\": \"postgres\",\n  \"user\": \"postgres\",\n  \"password\": \"{{dbPassword}}\",\n  \"ssl\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/connections",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "connections"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete-connection",
+      "id": "95cd0291-6414-40f2-9116-76506aafafa1",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/connections/:id",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "connections",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "{{connectionId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get-connections",
+      "id": "2f8c32ea-ef3c-40dc-a03e-3f2968d181ed",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/connections",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "connections"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "query",
+      "id": "b9143619-aada-48d7-bc88-01c0e96ef1d9",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sql\": \"SELECT * FROM \\\"public\\\".\\\"users\\\" LIMIT 100\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/connections/:id/query",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "connections",
+            ":id",
+            "query"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "{{connectionId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get-tables",
+      "id": "70b2ccd3-aae3-4d47-a660-eddb33a257bc",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/connections/:id/tables",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "connections",
+            ":id",
+            "tables"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "{{connectionId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get-columns",
+      "id": "a5b89729-f7fc-4e36-ab4b-4bb0df2e79ca",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/connections/:id/tables/:schema/:table/columns",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "connections",
+            ":id",
+            "tables",
+            ":schema",
+            ":table",
+            "columns"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "{{connectionId}}"
+            },
+            {
+              "key": "schema",
+              "value": "public"
+            },
+            {
+              "key": "table",
+              "value": "users"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "id": "82559afc-3c33-4c7f-bee1-4d4c17249600",
+      "key": "baseURL",
+      "value": "https://0.0.0.0:4000"
+    },
+    {
+      "id": "7a8ec2a3-7eec-40bb-8c56-6b0403a2961f",
+      "key": "connectionId",
+      "value": "1"
+    },
+    {
+      "id": "38f77dcb-be99-469a-9c52-29f5b2a42373",
+      "key": "dbPassword",
+      "value": "ANraOyl28RVTWJSO"
+    },
+    {
+      "id": "2f088c54-4475-48e9-99ae-4047a4ec43fc",
+      "key": "dbHost",
+      "value": "db.zltchkcgbqcmrpqowqii.supabase.co"
+    }
+  ]
+}
