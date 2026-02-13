@@ -24,6 +24,7 @@ export function QueryPage() {
     const [isRunning, setIsRunning] = useState(false)
     const [activeQueryId, setActiveQueryId] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
+    const [copied, setCopied] = useState(false)
     const runTokenRef = useRef<number>(0)
     const abortRef = useRef<AbortController | null>(null)
 
@@ -95,6 +96,18 @@ export function QueryPage() {
         }
     }
 
+    const copyQueryId = async () => {
+        const id = activeQueryId ?? result?.queryId
+        if (!id) return
+        try {
+            await navigator.clipboard.writeText(String(id))
+            setCopied(true)
+            setTimeout(() => setCopied(false), 900)
+        } catch {
+            // ignore (clipboard may be unavailable depending on browser permissions)
+        }
+    }
+
     const clearOutput = () => {
         setResult(null)
         setError(null)
@@ -106,7 +119,7 @@ export function QueryPage() {
             sidebar={
                 <Sidebar
                     onSelectTable={(schema, table) => {
-                        setSql(`SELECT * FROM ${tableRef(schema, table)} LIMIT 100`)
+                        setSql(`SELECT * FROM ${tableRef(schema, table)} LIMIT 100;`)
                     }}
                     onInsertColumn={(schema, table, column) => {
                         appendSql(columnRef(schema, table, column))
@@ -185,6 +198,26 @@ export function QueryPage() {
                         </div>
 
                         <div className="flex items-center gap-2">
+                            {(activeQueryId || result?.queryId) ? (
+                                <>
+                                    <span
+                                        className="text-xs rounded border border-neutral-800 bg-neutral-900 px-2 py-1 text-neutral-300 max-w-[220px] truncate"
+                                        title={String(activeQueryId ?? result?.queryId)}
+                                    >
+                                        id: {String(activeQueryId ?? result?.queryId)}
+                                    </span>
+
+                                    <button
+                                        type="button"
+                                        onClick={copyQueryId}
+                                        className="text-xs rounded border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 px-3 py-1"
+                                        title="Copy query id"
+                                    >
+                                        {copied ? 'Copied' : 'Copy'}
+                                    </button>
+                                </>
+                            ) : null}
+
                             <button
                                 type="button"
                                 onClick={clearOutput}
