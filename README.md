@@ -1,5 +1,10 @@
 # 🧪 TabbleLab
 
+[![Postman Collection](https://img.shields.io/badge/Postman-Collection-orange?logo=postman&logoColor=white)](https://altarlink.postman.co/workspace/CIAM~4d8cfcbb-286f-482d-9c66-f82a9b335d46/collection/30447307-b7ce3cd5-b426-4e84-a06b-816c604e072f?action=share&creator=30447307&active-environment=30447307-28dd5f85-c186-44cc-9971-868c0e9ab618)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub Issues](https://img.shields.io/github/issues/balkacer/tabblelab)](https://github.com/balkacer/tabblelab/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/balkacer/tabblelab)](https://github.com/balkacer/tabblelab/pulls)
+
 > The open-source SQL lab for modern developers.
 
 TabbleLab is a self-hosted, web-based database manager designed to explore, query and understand your databases through a clean, minimal and modern interface — without installing heavy desktop clients.
@@ -124,22 +129,43 @@ pnpm dev:api
 pnpm dev:web
 ```
 
+## 🧪 API Testing (Postman)
+
+TabbleLab includes a ready-to-use Postman collection for local development.
+
+You can find it here: [TabbleLab Postman Collection](https://altarlink.postman.co/workspace/CIAM~4d8cfcbb-286f-482d-9c66-f82a9b335d46/collection/30447307-b7ce3cd5-b426-4e84-a06b-816c604e072f?action=share&creator=30447307&active-environment=30447307-28dd5f85-c186-44cc-9971-868c0e9ab618)
+
+### How to use
+
+1. Import the collection into Postman.
+2. Set the collection variables:
+   - `baseUrl` → `http://localhost:4000`
+   - `dbHost` → `localhost`
+   - `dbPassword` → `your_db_password`
+3. Run:
+   - Create Connection
+   - List Tables
+   - Run Query
+   - Delete Connection
+
+This collection is intended for local development and backend validation.
+
 ## 🗺 Roadmap
 
-**v0.1**
+### v0.1
 
 - PostgreSQL support
 - SQL editor
 - Schema explorer
 - Query execution
 
-**v0.2**
+### v0.2
 
 - MySQL & MSSQL
 - Saved queries
 - Multi-connection management
 
-**v0.3**
+### v0.3
 
 - Roles & permissions
 - Query insights
