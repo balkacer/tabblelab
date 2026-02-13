@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { BadGatewayException, BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { randomUUID } from 'crypto'
 import {
     PostgresConnectionConfig,
@@ -29,7 +29,20 @@ export class ConnectionManager {
                 throw new BadRequestException('Unsupported database type')
         }
 
-        await driver.connect()
+        try {
+            await driver.connect()
+        } catch (err: any) {
+            // casos típicos:
+            // ENETUNREACH, ECONNREFUSED, ETIMEDOUT, EAI_AGAIN, ENOTFOUND
+            const code = err?.code
+            if (['ENETUNREACH', 'ECONNREFUSED', 'ETIMEDOUT', 'EAI_AGAIN', 'ENOTFOUND'].includes(code)) {
+                throw new BadGatewayException(
+                    `Cannot reach database host (${code}). If using Docker Compose, set host to "db".`,
+                )
+            }
+
+            throw new BadRequestException('Failed to create connection. Please verify credentials and host.')
+        }
 
         const id = randomUUID()
 
