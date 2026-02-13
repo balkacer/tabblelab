@@ -1,0 +1,78 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: tabblelab-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tabblelab
+    ports:
+      - "5432:5432"
+    volumes:
+      - tabblelab_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tabblelab"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile.dev
+    container_name: tabblelab-api
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      TABBLELAB_MASTER_KEY: ${TABBLELAB_MASTER_KEY}
+      CI: "1"
+      PNPM_HOME: /pnpm
+      PATH: /pnpm:$PATH
+      PNPM_STORE_DIR: /pnpm-store
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./:/repo
+      - api_node_modules:/repo/apps/api/node_modules
+      - root_node_modules:/repo/node_modules
+      - pnpm_store:/pnpm-store
+    working_dir: /repo
+    tty: true
+    stdin_open: true
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["sh", "-lc", "pnpm install --force && pnpm --filter api dev"]
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile.dev
+    container_name: tabblelab-web
+    environment:
+      NODE_ENV: development
+      VITE_API_BASE_URL: http://localhost:4000
+      CI: "1"
+      PNPM_HOME: /pnpm
+      PATH: /pnpm:$PATH
+      PNPM_STORE_DIR: /pnpm-store
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./:/repo
+      - web_node_modules:/repo/apps/web/node_modules
+      - root_node_modules:/repo/node_modules
+      - pnpm_store:/pnpm-store
+    working_dir: /repo
+    tty: true
+    stdin_open: true
+    depends_on:
+      - api
+    command: ["sh", "-lc", "pnpm install --force && pnpm --filter web dev --host 0.0.0.0 --port 5173"]
+
+volumes:
+  tabblelab_pgdata:
+  root_node_modules:
+  api_node_modules:
+  web_node_modules:
+  pnpm_store:

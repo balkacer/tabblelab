@@ -7,8 +7,18 @@ import { GlobalExceptionFilter } from './common/filters/http-exception.filter'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+  ]
+
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: (origin: string, callback: (arg0: Error | null, arg1: boolean) => any) => {
+      // Permite tools sin origin (curl, postman)
+      if (!origin) return callback(null, true)
+      if (allowedOrigins.includes(origin)) return callback(null, true)
+      return callback(new Error(`CORS blocked for origin: ${origin}`), false)
+    },
     credentials: true,
   })
 
@@ -22,8 +32,9 @@ async function bootstrap() {
 
   app.useGlobalFilters(new GlobalExceptionFilter())
 
-  await app.listen(4000)
-  console.log('TabbleLab API running on http://localhost:4000')
+  const port = Number(process.env.PORT ?? 4000)
+  await app.listen(port, '0.0.0.0')
+  console.log(`TabbleLab API running on port ${port}`)
 }
 
 bootstrap()

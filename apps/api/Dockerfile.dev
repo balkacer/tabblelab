@@ -1,0 +1,17 @@
+FROM node:20-alpine
+
+WORKDIR /repo
+
+# pnpm via corepack
+RUN corepack enable
+RUN corepack prepare pnpm@10.29.3 --activate
+
+# Copiamos solo manifests para cache
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+COPY apps/api/package.json apps/api/package.json
+COPY packages/database-core/package.json packages/database-core/package.json
+
+RUN pnpm config set store-dir /pnpm-store && pnpm install
+
+EXPOSE 4000
+CMD ["pnpm", "--filter", "api", "dev"]
