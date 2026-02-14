@@ -1,6 +1,7 @@
 export interface QueryOptions {
     timeoutMs?: number
     rowLimit?: number
+    safeMode?: boolean
 }
 
 export interface QueryResult {

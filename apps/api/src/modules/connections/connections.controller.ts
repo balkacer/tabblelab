@@ -5,10 +5,12 @@ import {
     Delete,
     Body,
     Param,
+    Req,
 } from '@nestjs/common'
 import { ConnectionManager } from './connection.manager'
 import { CreateConnectionDto } from './dto/create-connection.dto'
 import { QueryDto } from './dto/query.dto'
+import { Request } from 'express'
 
 @Controller('connections')
 export class ConnectionsController {
@@ -43,12 +45,17 @@ export class ConnectionsController {
     async query(
         @Param('id') id: string,
         @Body() dto: QueryDto,
+        @Req() req: Request,
     ) {
+        const isAuthenticated = !!(req as any).user?.sub
+        const requestedSafeMode = dto.safeMode ?? true
+        const safeMode = isAuthenticated ? requestedSafeMode : true
         const driver = this.connectionManager.getDriver(id)
 
         const result = await driver.query(dto.sql, {
             timeoutMs: dto.timeoutMs,
             rowLimit: dto.rowLimit,
+            safeMode,
         })
 
         return result

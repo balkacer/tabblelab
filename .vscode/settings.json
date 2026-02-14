@@ -13,5 +13,8 @@
     },
     "[typescriptreact]": {
         "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[dockercompose]": {
+        "editor.defaultFormatter": "docker.docker"
     }
 }

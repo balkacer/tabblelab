@@ -4,7 +4,7 @@ import {
     QueryOptions,
     QueryResult,
 } from '@tabblelab/database-core'
-import { BadRequestException } from '@nestjs/common'
+import { BadRequestException, ForbiddenException } from '@nestjs/common'
 import { randomUUID } from 'crypto'
 
 export class PostgresDriver implements DatabaseDriver {
@@ -28,7 +28,11 @@ export class PostgresDriver implements DatabaseDriver {
         const s = sql.trim().toLowerCase()
         if (!s.startsWith('select') && !s.startsWith('with')) {
             // WITH ... SELECT
-            throw new BadRequestException('Only SELECT statements are allowed in safe mode')
+            throw new ForbiddenException({
+                code: 'SAFE_MODE_BLOCKED',
+                action: 'AUTH_REQUIRED_FOR_UNSAFE_MODE',
+                message: 'Safe mode is enabled. Only SELECT statements are allowed.',
+            })
         }
     }
 
@@ -52,7 +56,7 @@ export class PostgresDriver implements DatabaseDriver {
 
     async query(
         sql: string,
-        opts?: { timeoutMs?: number; rowLimit?: number },
+        opts?: { timeoutMs?: number; rowLimit?: number, safeMode?: boolean },
     ): Promise<{
         queryId: string
         columns: string[]
@@ -65,11 +69,12 @@ export class PostgresDriver implements DatabaseDriver {
         // defaults/env
         const defaultTimeoutMs = Number(process.env.TABBLELAB_DEFAULT_TIMEOUT_MS ?? 8000)
         const maxRowLimit = Number(process.env.TABBLELAB_MAX_ROW_LIMIT ?? 1000)
-        const safeMode = String(process.env.TABBLELAB_SAFE_MODE ?? 'true') === 'true'
+        const defaultSafeMode = String(process.env.TABBLELAB_SAFE_MODE ?? 'true') === 'true'
 
         const timeoutMs = Math.max(1, opts?.timeoutMs ?? defaultTimeoutMs)
         const requestedLimit = opts?.rowLimit ?? maxRowLimit
         const rowLimit = Math.min(Math.max(1, requestedLimit), maxRowLimit)
+        const safeMode = opts?.safeMode ?? defaultSafeMode
 
         const cleanSql = this.normalizeSql(sql)
 

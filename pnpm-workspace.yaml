@@ -9,4 +9,5 @@ catalog:
 
 ignoredBuiltDependencies:
   - '@nestjs/core'
+  - bcrypt
   - esbuild
