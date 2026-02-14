@@ -1,15 +1,10 @@
-import { useConnectionStore } from './store/connection.store'
-import { ConnectionPage } from './pages/ConnectionPage'
-import { QueryPage } from './pages/QueryPage'
+import { BrowserRouter } from 'react-router-dom'
+import { AppInner } from './components/AppInner'
 
-function App() {
-  const connectionId = useConnectionStore((s) => s.connectionId)
-
+export default function App() {
   return (
-    <div className="h-screen bg-neutral-950 text-white overflow-hidden">
-      {connectionId ? <QueryPage /> : <ConnectionPage />}
-    </div>
+    <BrowserRouter>
+      <AppInner />
+    </BrowserRouter>
   )
 }
-
-export default App
