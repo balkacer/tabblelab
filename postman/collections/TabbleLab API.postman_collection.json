@@ -7,308 +7,437 @@
   },
   "item": [
     {
-      "name": "create-connection",
-      "event": [
+      "name": "Auth",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "id": "206ad146-fc26-46dc-a88f-de422ed94cab",
-            "exec": [
-              "pm.environment.set(\"connectionId\", pm.response.json().connectionId)"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
+          "name": "auth-register",
+          "id": "6d032a9b-fa20-4b83-87e3-38f4cf094f37",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \n    \"email\": \"{{testEmail}}\", \n    \"password\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/auth/register",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
         },
         {
-          "listen": "prerequest",
-          "script": {
-            "id": "0d9c9b81-7bce-4bc1-acd4-ed16e2b57e0e",
-            "exec": [
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
+          "name": "auth-me",
+          "id": "5fe327b5-479a-4d66-bb6b-bd77246dcac4",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/auth/me",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "auth-login",
+          "id": "bd3ee017-c99c-406b-99b9-6f35e2850afc",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \n    \"email\": \"{{testEmail}}\", \n    \"password\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/auth/login",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "auth-logout",
+          "id": "12f52f06-befb-48f1-b489-6fe6cb656985",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/auth/logout",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
         }
       ],
-      "id": "d2ad5c50-50f2-4b98-a3e5-9c334cd574eb",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"type\": \"postgres\",\n  \"host\": \"{{dbHost}}\",\n  \"port\": {{dbPort}},\n  \"database\": \"{{dbName}}\",\n  \"user\": \"{{dbUser}}\",\n  \"password\": \"{{dbPassword}}\",\n  \"ssl\": false\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseURL}}/connections",
-          "host": [
-            "{{baseURL}}"
-          ],
-          "path": [
-            "connections"
-          ]
-        }
-      },
-      "response": []
+      "id": "cec2e533-14e0-448a-be86-f84c5543c3d0"
     },
     {
-      "name": "delete-connection",
-      "id": "95cd0291-6414-40f2-9116-76506aafafa1",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseURL}}/connections/:id",
-          "host": [
-            "{{baseURL}}"
-          ],
-          "path": [
-            "connections",
-            ":id"
-          ],
-          "variable": [
+      "name": "Connections",
+      "item": [
+        {
+          "name": "create-connection",
+          "event": [
             {
-              "key": "id",
-              "value": "{{connectionId}}"
+              "listen": "test",
+              "script": {
+                "id": "206ad146-fc26-46dc-a88f-de422ed94cab",
+                "exec": [
+                  "pm.environment.set(\"connectionId\", pm.response.json().connectionId)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "0d9c9b81-7bce-4bc1-acd4-ed16e2b57e0e",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "get-connections",
-      "id": "2f8c32ea-ef3c-40dc-a03e-3f2968d181ed",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseURL}}/connections",
-          "host": [
-            "{{baseURL}}"
           ],
-          "path": [
-            "connections"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "query",
-      "event": [
-        {
-          "listen": "prerequest",
-          "script": {
-            "id": "af8dbe5c-3d90-4617-a835-d0b007d64b6e",
-            "exec": [
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
+          "id": "d2ad5c50-50f2-4b98-a3e5-9c334cd574eb",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"postgres\",\n  \"host\": \"{{dbHost}}\",\n  \"port\": {{dbPort}},\n  \"database\": \"{{dbName}}\",\n  \"user\": \"{{dbUser}}\",\n  \"password\": \"{{dbPassword}}\",\n  \"ssl\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/connections",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "connections"
+              ]
+            }
+          },
+          "response": []
         },
         {
-          "listen": "test",
-          "script": {
-            "id": "b629d790-dee7-4106-a37a-9c4435e91621",
-            "exec": [
-              "pm.environment.set(\"queryId\", pm.response.json().queryId);"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
+          "name": "delete-connection",
+          "id": "95cd0291-6414-40f2-9116-76506aafafa1",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/connections/:id",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "connections",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{connectionId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-connections",
+          "id": "2f8c32ea-ef3c-40dc-a03e-3f2968d181ed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/connections",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "connections"
+              ]
+            }
+          },
+          "response": []
         }
       ],
-      "id": "b9143619-aada-48d7-bc88-01c0e96ef1d9",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"sql\": \"SELECT NOW() AS current_time\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+      "id": "f71612c6-3b24-43d2-bd0c-e6e12458798e"
+    },
+    {
+      "name": "Queries",
+      "item": [
+        {
+          "name": "query",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "af8dbe5c-3d90-4617-a835-d0b007d64b6e",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "b629d790-dee7-4106-a37a-9c4435e91621",
+                "exec": [
+                  "pm.environment.set(\"queryId\", pm.response.json().queryId);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
-          }
+          ],
+          "id": "b9143619-aada-48d7-bc88-01c0e96ef1d9",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sql\": \"SELECT NOW() AS current_time\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/connections/:id/query",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "connections",
+                ":id",
+                "query"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{connectionId}}"
+                }
+              ]
+            }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "{{baseURL}}/connections/:id/query",
-          "host": [
-            "{{baseURL}}"
-          ],
-          "path": [
-            "connections",
-            ":id",
-            "query"
-          ],
-          "variable": [
-            {
-              "key": "id",
-              "value": "{{connectionId}}"
-            }
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "get-tables",
-      "id": "70b2ccd3-aae3-4d47-a660-eddb33a257bc",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseURL}}/connections/:id/tables",
-          "host": [
-            "{{baseURL}}"
-          ],
-          "path": [
-            "connections",
-            ":id",
-            "tables"
-          ],
-          "variable": [
-            {
-              "key": "id",
-              "value": "{{connectionId}}"
-            }
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "get-columns",
-      "id": "a5b89729-f7fc-4e36-ab4b-4bb0df2e79ca",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseURL}}/connections/:id/tables/:schema/:table/columns",
-          "host": [
-            "{{baseURL}}"
-          ],
-          "path": [
-            "connections",
-            ":id",
-            "tables",
-            ":schema",
-            ":table",
-            "columns"
-          ],
-          "variable": [
-            {
-              "key": "id",
-              "value": "{{connectionId}}"
+        {
+          "name": "cancel-query",
+          "id": "3938a7d5-98b9-4ba3-b9ba-99c541439184",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sql\": \"SELECT NOW() AS current_time\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            {
-              "key": "schema",
-              "value": "public"
-            },
-            {
-              "key": "table",
-              "value": "users"
+            "url": {
+              "raw": "{{baseURL}}/connections/:id/query/:queryId/cancel",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "connections",
+                ":id",
+                "query",
+                ":queryId",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{connectionId}}"
+                },
+                {
+                  "key": "queryId",
+                  "value": "{{queryId}}"
+                }
+              ]
             }
-          ]
+          },
+          "response": []
         }
-      },
-      "response": []
+      ],
+      "id": "61d5c92b-60d2-499a-9a94-07eda0210078"
     },
     {
-      "name": "cancel-query",
-      "id": "3938a7d5-98b9-4ba3-b9ba-99c541439184",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"sql\": \"SELECT NOW() AS current_time\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+      "name": "Database",
+      "item": [
+        {
+          "name": "get-tables",
+          "id": "70b2ccd3-aae3-4d47-a660-eddb33a257bc",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/connections/:id/tables",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "connections",
+                ":id",
+                "tables"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{connectionId}}"
+                }
+              ]
             }
-          }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "{{baseURL}}/connections/:id/query/:queryId/cancel",
-          "host": [
-            "{{baseURL}}"
-          ],
-          "path": [
-            "connections",
-            ":id",
-            "query",
-            ":queryId",
-            "cancel"
-          ],
-          "variable": [
-            {
-              "key": "id",
-              "value": "{{connectionId}}"
-            },
-            {
-              "key": "queryId",
-              "value": "{{queryId}}",
-              "uuid": "94c77eb4-b9a4-448b-90cf-d478c71ec9d5"
+        {
+          "name": "get-columns",
+          "id": "a5b89729-f7fc-4e36-ab4b-4bb0df2e79ca",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/connections/:id/tables/:schema/:table/columns",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "connections",
+                ":id",
+                "tables",
+                ":schema",
+                ":table",
+                "columns"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{connectionId}}"
+                },
+                {
+                  "key": "schema",
+                  "value": "public"
+                },
+                {
+                  "key": "table",
+                  "value": "users"
+                }
+              ]
             }
-          ]
+          },
+          "response": []
         }
-      },
-      "response": []
+      ],
+      "id": "3dbf28f0-41b6-4632-86ce-f365f69f171f"
     }
   ],
   "variable": [
     {
-      "id": "5b386f9f-badc-4e7c-843a-f8040a9020ad",
+      "id": "b8abfff7-929c-4496-bc7c-4b0fc67e4830",
       "key": "baseURL",
       "value": "http://0.0.0.0:4000"
     },
     {
-      "id": "064c3256-22f2-43ab-a71d-95fc7f0d9722",
+      "id": "016295aa-d4d9-4a41-8fda-ca5d807692e8",
       "key": "connectionId",
       "value": "1"
     },
     {
-      "id": "fb79e632-9e2a-4239-bf90-e0a44054d9a8",
+      "id": "7dcdba73-2a2e-4cf3-a7e6-72d96c34e331",
       "key": "dbPassword",
       "value": "postgres"
     },
     {
-      "id": "55874ae8-88e0-4c56-a011-de3d28599438",
+      "id": "14e4c83d-0f47-4ed7-9be9-2e1fe964cdd4",
       "key": "dbHost",
       "value": "db"
     },
     {
-      "id": "41316839-46c7-4d34-b699-c638795b74a7",
+      "id": "8e1222ae-52e3-4d26-87ae-09cd83b39f77",
       "key": "dbName",
       "value": "tabblelab"
     },
     {
-      "id": "6a575afb-fb66-4a06-a2b5-8b9951943fae",
+      "id": "3379c847-3293-46b5-9456-1c40126eb982",
       "key": "dbPort",
       "value": "5432"
     },
     {
-      "id": "204823dc-e83c-4dc2-9917-172df6e9cba8",
+      "id": "5274cde3-51fa-4174-a624-97e1cbcf985f",
       "key": "dbUser",
       "value": "postgres"
     },
     {
-      "id": "6b3b7838-946a-4ce4-b662-31cca64dece1",
+      "id": "5e7e0e48-0e79-4d18-8467-38bc05c9fca1",
       "key": "queryId",
       "value": "1"
+    },
+    {
+      "id": "1828e5ab-81e6-4a74-88ae-db1f4e340d90",
+      "key": "testPassword",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "a9f05ac6-ed4b-47b9-a6f8-a2af028198c6",
+      "key": "testEmail",
+      "value": "",
+      "type": "default"
     }
   ]
 }
