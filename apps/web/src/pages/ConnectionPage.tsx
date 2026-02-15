@@ -5,8 +5,14 @@ import { useNavigate } from 'react-router-dom'
 
 export function ConnectionPage() {
   const setConnectionId = useConnectionStore((s) => s.setConnectionId)
+  const setConnectionMeta = useConnectionStore((s) => s.setConnectionMeta)
   const navigate = useNavigate()
   const connectionId = useConnectionStore((s) => s.connectionId)
+  const saved = useConnectionStore((s) => s.saved)
+  const hydrateSaved = useConnectionStore((s) => s.hydrateSaved)
+  const addOrUpdateSaved = useConnectionStore((s) => s.addOrUpdateSaved)
+  const removeSaved = useConnectionStore((s) => s.removeSaved)
+  const renameSaved = useConnectionStore((s) => s.renameSaved)
 
   const [form, setForm] = useState({
     name: '',
@@ -31,6 +37,10 @@ export function ConnectionPage() {
   useEffect(() => {
     if (connectionId) navigate('/query', { replace: true })
   }, [connectionId, navigate])
+
+  useEffect(() => {
+    hydrateSaved()
+  }, [hydrateSaved])
 
   const handleConnect = async () => {
     if (isConnecting) return
@@ -59,6 +69,15 @@ export function ConnectionPage() {
       })
 
       setConnectionId(res.data.connectionId)
+      setConnectionMeta({ driver: 'postgres', name: effectiveAlias })
+
+      addOrUpdateSaved({
+        name: effectiveAlias,
+        host: form.host.trim(),
+        port: Number(form.port),
+        database: form.database.trim(),
+        user: form.user.trim(),
+      })
     } catch (err: any) {
       const message =
         err?.response?.data?.message ??
@@ -94,6 +113,78 @@ export function ConnectionPage() {
           </div>
         ) : null}
 
+        {saved.length > 0 ? (
+          <div className="mt-5">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium text-neutral-200">Saved connections</div>
+              <div className="text-xs text-neutral-500">Passwords are never saved</div>
+            </div>
+
+            <div className="mt-3 space-y-2">
+              {saved.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-950 p-3"
+                >
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-neutral-100 truncate" title={p.name}>
+                      {p.name}
+                    </div>
+                    <div className="text-xs text-neutral-500 truncate">
+                      postgres • {p.host}:{p.port} • {p.database} • {p.user}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      className="text-xs rounded border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 px-3 py-1"
+                      onClick={() => {
+                        // prefill form (password se queda vacío)
+                        setForm((f) => ({
+                          ...f,
+                          name: p.name,
+                          host: p.host,
+                          port: p.port,
+                          database: p.database,
+                          user: p.user,
+                          password: '',
+                        }))
+                      }}
+                      title="Load into form"
+                    >
+                      Load
+                    </button>
+
+                    <button
+                      type="button"
+                      className="text-xs rounded border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 px-3 py-1"
+                      onClick={() => {
+                        const newAlias = prompt('New alias', p.name)
+                        if (newAlias && newAlias.trim()) renameSaved(p.id, newAlias.trim())
+                      }}
+                      title="Rename"
+                    >
+                      Rename
+                    </button>
+
+                    <button
+                      type="button"
+                      className="text-xs rounded border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 px-3 py-1 text-red-200"
+                      onClick={() => {
+                        if (confirm(`Delete saved connection "${p.name}"?`)) removeSaved(p.id)
+                      }}
+                      title="Delete"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         <form
           className="mt-5 space-y-4"
           onSubmit={(e) => {
@@ -110,7 +201,7 @@ export function ConnectionPage() {
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
             <div className="mt-1 text-[11px] text-neutral-500">
-              If empty, we’ll use: <span className="text-neutral-300">{effectiveAlias}</span>
+              If empty, we’ll use: <span className="text-neutral-300">{form.database.trim()}</span>
             </div>
           </div>
 

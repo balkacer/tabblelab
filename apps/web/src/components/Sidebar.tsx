@@ -65,6 +65,7 @@ export function Sidebar({
   onInsertColumn?: (schema: string, table: string, column: string) => void
 }) {
   const connectionId = useConnectionStore((s) => s.connectionId)
+  const connectionMeta = useConnectionStore((s) => s.connectionMeta)
   const clearConnection = useConnectionStore((s) => s.clearConnection)
 
   // Tree state
@@ -105,8 +106,9 @@ export function Sidebar({
         <button
           onClick={clearConnection}
           className="text-xs text-red-400 hover:underline"
+          title="Clears the active session connectionId"
         >
-          Disconnect
+          Disconnect session
         </button>
       </div>
 
@@ -116,7 +118,13 @@ export function Sidebar({
         open={openConnection}
         label={
           <span className="text-neutral-200">
-            TabbleLab <span className="text-neutral-500">(active)</span>
+            <span className="font-medium">
+              {connectionMeta?.name ?? 'TabbleLab'}
+            </span>{' '}
+            <span className="text-neutral-500">
+              ({connectionMeta?.driver ?? 'postgres'})
+            </span>{' '}
+            <span className="text-neutral-500">(active)</span>
           </span>
         }
         onClick={() => setOpenConnection((v) => !v)}
