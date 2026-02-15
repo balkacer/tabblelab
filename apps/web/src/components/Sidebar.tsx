@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useConnectionStore } from '../store/connection.store'
 import { fetchTables, fetchColumns } from '../api/schema'
+import { useNavigate } from 'react-router-dom'
+import { deleteConnection } from '../api/connections'
 
 type TableRef = { schema: string; name: string }
 
@@ -67,6 +69,8 @@ export function Sidebar({
   const connectionId = useConnectionStore((s) => s.connectionId)
   const connectionMeta = useConnectionStore((s) => s.connectionMeta)
   const clearConnection = useConnectionStore((s) => s.clearConnection)
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   // Tree state
   const [openConnection, setOpenConnection] = useState(true)
@@ -104,9 +108,23 @@ export function Sidebar({
           Explorer
         </div>
         <button
-          onClick={clearConnection}
+          onClick={async () => {
+            try {
+              if (connectionId) await deleteConnection(connectionId)
+            } catch (e) {
+              console.warn('Failed to delete backend connection', e)
+            } finally {
+              // Front cleanup siempre
+              clearConnection()
+              queryClient.removeQueries({ queryKey: ['tables'], exact: false })
+              queryClient.removeQueries({ queryKey: ['columns'], exact: false })
+              setOpenSchemas({})
+              setOpenTables({})
+              navigate('/connect', { replace: true })
+            }
+          }}
           className="text-xs text-red-400 hover:underline"
-          title="Clears the active session connectionId"
+          title="Closes the backend connection and clears the session"
         >
           Disconnect session
         </button>

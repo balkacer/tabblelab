@@ -6,6 +6,8 @@ import { Sidebar } from '../components/Sidebar'
 import { ResultTable } from '../components/ResultTable'
 import { SqlEditor } from '../components/SqlEditor'
 import { useSqlStore } from '../store/sql.store'
+import { Link } from 'react-router-dom'
+import { useAuthStore } from '../store/auth.store'
 
 export function QueryPage() {
     const connectionId = useConnectionStore((s) => s.connectionId)
@@ -13,6 +15,7 @@ export function QueryPage() {
     const sql = useSqlStore((s) => s.sql)
     const setSql = useSqlStore((s) => s.setSql)
     const appendSql = useSqlStore((s) => s.appendSql)
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
 
     const quoteIdent = (value: string) => `"${value.replaceAll('"', '""')}"`
     const tableRef = (schema: string, table: string) =>
@@ -27,6 +30,7 @@ export function QueryPage() {
     const [copied, setCopied] = useState(false)
     const runTokenRef = useRef<number>(0)
     const abortRef = useRef<AbortController | null>(null)
+    const [safeMode, setSafeMode] = useState(true)
 
     const runQuery = async () => {
         if (!connectionId) return
@@ -48,7 +52,12 @@ export function QueryPage() {
         try {
             const res = await api.post(
                 `/connections/${connectionId}/query`,
-                { sql },
+                {
+                    sql,
+                    timeoutMs: 60 * 1000, // 1 minute
+                    rowLimit: 1000,
+                    safeMode,
+                },
                 { signal: controller.signal },
             )
 
@@ -134,6 +143,41 @@ export function QueryPage() {
                         </h1>
 
                         <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    disabled={!isAuthenticated}
+                                    onClick={() => setSafeMode((v) => !v)}
+                                    className={[
+                                        'h-8 px-3 rounded border text-xs flex items-center gap-2',
+                                        safeMode ? 'bg-neutral-900 border-neutral-800 text-neutral-200' : 'bg-neutral-100 border-neutral-200 text-neutral-900',
+                                        !isAuthenticated ? 'opacity-60 cursor-not-allowed' : 'hover:opacity-90',
+                                    ].join(' ')}
+                                    title={
+                                        !isAuthenticated
+                                            ? 'Safe Mode is locked for guests. Login to disable.'
+                                            : safeMode
+                                                ? 'Safe Mode ON (read-only)'
+                                                : 'Safe Mode OFF (write enabled)'
+                                    }
+                                >
+                                    <span className="inline-flex w-4 justify-center">
+                                        {!isAuthenticated ? '🔒' : safeMode ? '🛡️' : '⚠️'}
+                                    </span>
+                                    <span>Safe Mode</span>
+                                    <span className="opacity-80">{safeMode ? 'ON' : 'OFF'}</span>
+                                </button>
+
+                                {!isAuthenticated ? (
+                                    <div className="text-[11px] text-neutral-500">
+                                        Locked for guests.{' '}
+                                        <Link className="text-neutral-200 underline" to="/login">
+                                            Login
+                                        </Link>{' '}
+                                        to disable.
+                                    </div>
+                                ) : null}
+                            </div>
                             <button
                                 onClick={runQuery}
                                 disabled={isRunning}
