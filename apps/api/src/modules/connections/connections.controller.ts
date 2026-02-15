@@ -6,6 +6,8 @@ import {
     Body,
     Param,
     Req,
+    HttpCode,
+    NotFoundException,
 } from '@nestjs/common'
 import { ConnectionManager } from './connection.manager'
 import { CreateConnectionDto } from './dto/create-connection.dto'
@@ -33,12 +35,19 @@ export class ConnectionsController {
     }
 
     @Delete(':id')
+    @HttpCode(204)
     async delete(@Param('id') id: string) {
-        await this.connectionManager.closeConnection(id)
-
-        return {
-            message: 'Connection closed',
+        try {
+            await this.connectionManager.closeConnection(id)
+        } catch (err: any) {
+            // If the manager throws for missing connections, map it to a 404.
+            const msg = String(err?.message ?? '')
+            if (msg.toLowerCase().includes('not found') || msg.toLowerCase().includes('unknown connection')) {
+                throw new NotFoundException('Connection not found')
+            }
+            throw err
         }
+        return
     }
 
     @Post(':id/query')
