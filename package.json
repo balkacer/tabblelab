@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "docker": "docker compose down -v && docker builder prune -f && docker compose build --no-cache && docker compose --env-file .env.docker up -d"
+    "docker": "docker compose down -v; docker volume prune -f; docker compose up --build -d"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",

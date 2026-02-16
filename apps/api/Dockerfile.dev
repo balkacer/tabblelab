@@ -1,5 +1,7 @@
 FROM node:20-alpine
 
+RUN apk add --no-cache curl
+
 WORKDIR /repo
 
 # pnpm via corepack
@@ -11,7 +13,10 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY apps/api/package.json apps/api/package.json
 COPY packages/database-core/package.json packages/database-core/package.json
 
-RUN pnpm config set store-dir /pnpm-store && pnpm install
+ENV CI=true
+RUN mkdir -p /pnpm-store \
+  && pnpm config set store-dir /pnpm-store \
+  && pnpm config set package-import-method copy
 
 EXPOSE 4000
-CMD ["pnpm", "--filter", "api", "dev"]
+CMD ["sh", "-lc", "pnpm config set store-dir /pnpm-store && pnpm config set package-import-method copy && pnpm install --frozen-lockfile && pnpm --filter @tabblelab/database-core build && pnpm --filter api dev"]

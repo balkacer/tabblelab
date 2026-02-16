@@ -1,10 +1,14 @@
 {
     "cSpell.words": [
         "ciphertext",
+        "healthcheck",
+        "isready",
+        "pgdata",
         "schemaname",
         "Tabble",
         "TABBLELAB",
-        "tablename"
+        "tablename",
+        "timestamptz"
     ],
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",

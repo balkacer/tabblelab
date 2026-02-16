@@ -21,18 +21,11 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile.dev
     container_name: tabblelab-api
+    env_file:
+      - ./apps/api/.env
     environment:
       NODE_ENV: development
       PORT: 4000
-      TABBLELAB_MASTER_KEY: ${TABBLELAB_MASTER_KEY}
-      TABBLELAB_DEFAULT_TIMEOUT_MS: ${TABBLELAB_DEFAULT_TIMEOUT_MS}
-      TABBLELAB_MAX_ROW_LIMIT: ${TABBLELAB_MAX_ROW_LIMIT}
-      TABBLELAB_SAFE_MODE: ${TABBLELAB_SAFE_MODE}
-      TABBLELAB_AUTH_JWT_SECRET: ${TABBLELAB_AUTH_JWT_SECRET}
-      TABBLELAB_AUTH_COOKIE_NAME: ${TABBLELAB_AUTH_COOKIE_NAME}
-      TABBLELAB_AUTH_COOKIE_SECURE: ${TABBLELAB_AUTH_COOKIE_SECURE}
-      TABBLELAB_AUTH_COOKIE_DOMAIN: ${TABBLELAB_AUTH_COOKIE_DOMAIN}
-      TABBLELAB_AUTH_TOKEN_TTL: ${TABBLELAB_AUTH_TOKEN_TTL}
       CI: "1"
       PNPM_HOME: /pnpm
       PATH: /pnpm:$PATH
@@ -41,25 +34,29 @@ services:
       - "4000:4000"
     volumes:
       - ./:/repo
-      - api_node_modules:/repo/apps/api/node_modules
       - root_node_modules:/repo/node_modules
       - pnpm_store:/pnpm-store
     working_dir: /repo
-    tty: true
-    stdin_open: true
     depends_on:
       db:
         condition: service_healthy
-    command: ["sh", "-lc", "pnpm install --force && pnpm --filter api dev"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:4000/health > /dev/null || exit 1"]
+      interval: 15s
+      timeout: 15s
+      start_period: 20s
+      retries: 10
+    command: ["sh", "-lc", "pnpm config set store-dir /pnpm-store && pnpm config set package-import-method copy && pnpm install --frozen-lockfile && pnpm --filter @tabblelab/database-core build && pnpm --filter api dev"]
 
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile.dev
     container_name: tabblelab-web
+    env_file:
+      - ./apps/web/.env
     environment:
       NODE_ENV: development
-      VITE_API_BASE_URL: http://localhost:4000
       CI: "1"
       PNPM_HOME: /pnpm
       PATH: /pnpm:$PATH
@@ -68,19 +65,15 @@ services:
       - "5173:5173"
     volumes:
       - ./:/repo
-      - web_node_modules:/repo/apps/web/node_modules
       - root_node_modules:/repo/node_modules
       - pnpm_store:/pnpm-store
     working_dir: /repo
-    tty: true
-    stdin_open: true
     depends_on:
-      - api
-    command: ["sh", "-lc", "pnpm install --force && pnpm --filter web dev --host 0.0.0.0 --port 5173"]
+      api:
+        condition: service_healthy
+    command: ["sh", "-lc", "pnpm --filter web dev --host 0.0.0.0 --port 5173"]
 
 volumes:
   tabblelab_pgdata:
   root_node_modules:
-  api_node_modules:
-  web_node_modules:
   pnpm_store:
