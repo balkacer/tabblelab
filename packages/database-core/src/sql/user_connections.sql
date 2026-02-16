@@ -9,6 +9,7 @@ CREATE TABLE
         database text NOT NULL,
         db_user text NOT NULL,
         password_enc text NULL,
+        ssl boolean NOT NULL DEFAULT false,
         created_at timestamptz NOT NULL DEFAULT now (),
         updated_at timestamptz NOT NULL DEFAULT now (),
         last_used_at timestamptz NULL
