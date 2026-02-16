@@ -1,5 +1,5 @@
 import { SupportedDatabase, supportedDrivers } from "@tabblelab/database-core"
-import { IsOptional, IsString, IsIn, IsNumber, IsBoolean, IsEnum } from "class-validator"
+import { IsOptional, IsString, IsIn, IsNumber, IsBoolean } from "class-validator"
 
 export class UpsertUserConnectionDto {
     @IsOptional()

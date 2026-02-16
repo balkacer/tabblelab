@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import { AuthBadge } from "./AuthBadge";
+import { AuthBadge } from "../components/AuthBadge";
 
-export function Shell({ children }: { children: React.ReactNode }) {
+export function ShellLayout({ children }: { children: React.ReactNode }) {
     return (
         <div className="h-screen bg-neutral-950 text-white overflow-hidden flex flex-col">
             <header className="h-12 shrink-0 border-b border-neutral-900 bg-neutral-950/60 backdrop-blur flex items-center justify-between px-4">

@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useAuthStore } from "../store/auth.store"
-import { Shell } from "./Shell"
+import { ShellLayout } from "../layout/ShellLayout"
 import { Routes, Route, Navigate } from "react-router-dom"
 import { ConnectionPage } from "../pages/ConnectionPage"
 import { LoginPage } from "../pages/LoginPage"
@@ -17,7 +17,7 @@ export function AppInner() {
     }, [hydrate])
 
     return (
-        <Shell>
+        <ShellLayout>
             <Routes>
                 <Route path="/" element={<RootRedirect />} />
                 <Route path="/connect" element={<ConnectionPage />} />
@@ -33,6 +33,6 @@ export function AppInner() {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-        </Shell>
+        </ShellLayout>
     )
 }
