@@ -110,7 +110,7 @@
       "name": "Connections",
       "item": [
         {
-          "name": "create-connection",
+          "name": "open-connection",
           "event": [
             {
               "listen": "test",
@@ -143,7 +143,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"type\": \"postgres\",\n  \"host\": \"{{dbHost}}\",\n  \"port\": {{dbPort}},\n  \"database\": \"{{dbName}}\",\n  \"user\": \"{{dbUser}}\",\n  \"password\": \"{{dbPassword}}\",\n  \"ssl\": false\n}",
+              "raw": "{\n    \"driver\": \"postgres\",\n    \"host\": \"{{dbHost}}\",\n    \"port\": {{dbPort}},\n    \"database\": \"{{dbName}}\",\n    \"user\": \"{{dbUser}}\",\n    \"password\": \"{{dbPassword}}\",\n    \"ssl\": false\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -193,6 +193,59 @@
           "request": {
             "method": "GET",
             "header": [],
+            "url": {
+              "raw": "{{baseURL}}/connections",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "connections"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "open-profile-connection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "206ad146-fc26-46dc-a88f-de422ed94cab",
+                "exec": [
+                  "pm.environment.set(\"connectionId\", pm.response.json().connectionId)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "0d9c9b81-7bce-4bc1-acd4-ed16e2b57e0e",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "2797873d-3819-4641-a615-add1b1b155a6",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"profileConnectionId\": \"{{profileConnectionId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseURL}}/connections",
               "host": [
@@ -384,58 +437,175 @@
         }
       ],
       "id": "3dbf28f0-41b6-4632-86ce-f365f69f171f"
+    },
+    {
+      "name": "UserConnections",
+      "item": [
+        {
+          "name": "get-profile-connections",
+          "id": "79ff55bc-5c36-439a-8bc8-fc677b661603",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/profile-connections",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "profile-connections"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "save-profile-connection",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "33542e45-8ad9-496d-b726-5c74ce350bcb",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "7e33d9c5-3062-47da-bfc4-feb82ecacb29",
+                "exec": [
+                  "pm.environment.set(\"profileConnectionId\", pm.response.json().id)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "e1e0d8c5-dacc-4bdc-bc24-3a914ce512cd",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"driver\": \"postgres\",\n    \"name\": \"{{dbName}}\",\n    \"host\": \"{{dbHost}}\",\n    \"port\": {{dbPort}},\n    \"database\": \"{{dbName}}\",\n    \"user\": \"{{dbUser}}\",\n    \"password\": \"{{dbPassword}}\",\n    \"ssl\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/profile-connections",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "profile-connections"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete-profile-connection",
+          "id": "3e638c01-3345-4812-a89c-bc825660c381",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"driver\": \"postgres\",\n    \"name\": \"{{dbName}}\",\n    \"host\": \"{{dbHost}}\",\n    \"port\": {{dbPort}},\n    \"database\": \"{{dbName}}\",\n    \"user\": \"{{dbUser}}\",\n    \"password\": \"{{dbPassword}}\",\n    \"ssl\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/profile-connections/:id",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "profile-connections",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{profileConnectionId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "6f8317d7-9fc0-4c9c-a533-5042043887b7"
     }
   ],
   "variable": [
     {
-      "id": "b8abfff7-929c-4496-bc7c-4b0fc67e4830",
+      "id": "ea618b9b-0562-4cc0-a715-1d8c38f7fa34",
       "key": "baseURL",
       "value": "http://0.0.0.0:4000"
     },
     {
-      "id": "016295aa-d4d9-4a41-8fda-ca5d807692e8",
+      "id": "fc3d049b-5d9a-4958-a098-9a457095c2d3",
       "key": "connectionId",
       "value": "1"
     },
     {
-      "id": "7dcdba73-2a2e-4cf3-a7e6-72d96c34e331",
+      "id": "b07227aa-0215-4092-8db2-46fc1992b054",
       "key": "dbPassword",
       "value": "postgres"
     },
     {
-      "id": "14e4c83d-0f47-4ed7-9be9-2e1fe964cdd4",
+      "id": "bb23a919-41fc-4b5d-b0d5-3c5903e6b69f",
       "key": "dbHost",
       "value": "db"
     },
     {
-      "id": "8e1222ae-52e3-4d26-87ae-09cd83b39f77",
+      "id": "acc06bd5-5ab7-424f-bbb6-f6c3c7de9b18",
       "key": "dbName",
       "value": "tabblelab"
     },
     {
-      "id": "3379c847-3293-46b5-9456-1c40126eb982",
+      "id": "f2eb8f57-3b0f-4184-a2db-d1dbbfd5b5ba",
       "key": "dbPort",
       "value": "5432"
     },
     {
-      "id": "5274cde3-51fa-4174-a624-97e1cbcf985f",
+      "id": "74695fd4-6de7-426d-a840-336f6943c3b7",
       "key": "dbUser",
       "value": "postgres"
     },
     {
-      "id": "5e7e0e48-0e79-4d18-8467-38bc05c9fca1",
+      "id": "adab827a-ec93-40d6-b023-d475a147d02a",
       "key": "queryId",
       "value": "1"
     },
     {
-      "id": "1828e5ab-81e6-4a74-88ae-db1f4e340d90",
+      "id": "f03c9146-6fc2-48a6-8f86-845ababbbff2",
       "key": "testPassword",
       "value": "",
       "type": "default"
     },
     {
-      "id": "a9f05ac6-ed4b-47b9-a6f8-a2af028198c6",
+      "id": "064fb6f1-9cf0-47c7-9cc8-76363867e7bd",
       "key": "testEmail",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "fa1de2d1-38e5-4f61-994c-e3902852f32b",
+      "key": "profileConnectionId",
       "value": "",
       "type": "default"
     }
