@@ -1,9 +1,8 @@
-
-
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { UserConnectionsRepository, UserConnectionRow } from './userConnections.repository'
 import { UpsertUserConnectionDto } from '../dto/upsert-user-connection.dto'
 import { SupportedDatabase, supportedDrivers } from '@tabblelab/database-core'
+import { EncryptionService } from '../../security/encryption.service'
 
 export type UserConnectionProfile = Omit<UserConnectionRow, 'userId'>
 
@@ -32,6 +31,7 @@ function mapRow(row: UserConnectionRow): UserConnectionProfile {
         port: row.port,
         database: row.database,
         user: row.user,
+        passwordEnc: row.passwordEnc ?? null,
         ssl: row.ssl ?? null,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
@@ -41,13 +41,28 @@ function mapRow(row: UserConnectionRow): UserConnectionProfile {
 
 @Injectable()
 export class UserConnectionsService {
-    constructor(private readonly repo: UserConnectionsRepository) { }
+    constructor(private readonly repo: UserConnectionsRepository,
+        private readonly encryptionService: EncryptionService
+    ) { }
 
     async list(userId: string): Promise<UserConnectionProfile[]> {
         const uid = normalizeString(userId)
         if (!uid) throw new BadRequestException('Invalid userId')
         const rows = await this.repo.listByUserId(uid)
         return rows.map(mapRow)
+    }
+
+    async getById(userId: string, profileId: string): Promise<UserConnectionProfile> {
+        const uid = normalizeString(userId)
+        if (!uid) throw new BadRequestException('Invalid userId')
+
+        const id = normalizeString(profileId)
+        if (!id) throw new BadRequestException('Invalid profile id')
+
+        const row = await this.repo.findById(uid, id)
+        if (!row) throw new NotFoundException('Connection profile not found')
+
+        return mapRow(row)
     }
 
     async upsert(userId: string, dto: UpsertUserConnectionDto): Promise<{ id: string }> {
@@ -60,6 +75,7 @@ export class UserConnectionsService {
         const host = normalizeString((dto as any)?.host)
         const database = normalizeString((dto as any)?.database)
         const dbUser = normalizeString((dto as any)?.user)
+        const passwordEnc = dto.password ? this.encryptionService.encryptSecret(dto.password) : undefined
         const port = normalizePort((dto as any)?.port)
         const ssl = typeof (dto as any)?.ssl === 'boolean' ? (dto as any).ssl : undefined
 
@@ -77,6 +93,7 @@ export class UserConnectionsService {
             port,
             database,
             user: dbUser,
+            passwordEnc,
             ssl,
         })
     }

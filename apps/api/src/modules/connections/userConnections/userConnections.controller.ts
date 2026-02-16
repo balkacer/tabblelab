@@ -13,7 +13,7 @@ import type { Request } from 'express'
 import { UpsertUserConnectionDto } from '../dto/upsert-user-connection.dto'
 import { UserConnectionsService } from './userConnections.service'
 
-@Controller('me/connections')
+@Controller('profile-connections')
 export class UserConnectionsController {
     constructor(private readonly userConnectionsService: UserConnectionsService) { }
 

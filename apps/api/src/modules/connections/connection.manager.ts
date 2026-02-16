@@ -5,6 +5,8 @@ import {
     DatabaseDriver,
 } from '@tabblelab/database-core'
 import { PostgresDriver } from '../drivers/postgres.driver'
+import { UserConnectionsService } from './userConnections/userConnections.service'
+import { EncryptionService } from '../security/encryption.service'
 
 interface ManagedConnection {
     id: string
@@ -16,12 +18,17 @@ interface ManagedConnection {
 export class ConnectionManager {
     private connections = new Map<string, ManagedConnection>()
 
+    constructor(
+        private readonly userConnectionsService: UserConnectionsService,
+        private readonly encryptionService: EncryptionService
+    ) { }
+
     async createConnection(
         config: PostgresConnectionConfig,
     ): Promise<string> {
         let driver: DatabaseDriver
 
-        switch (config.type) {
+        switch (config.driver) {
             case 'postgres':
                 driver = new PostgresDriver(config)
                 break
@@ -53,6 +60,40 @@ export class ConnectionManager {
         })
 
         return id
+    }
+
+    async createConnectionFromProfile(profileId: string, userId: string, password?: string): Promise<string> {
+        const profile = await this.userConnectionsService.getById(userId, profileId)
+
+        if (!profile) {
+            throw new NotFoundException('Connection profile not found')
+        }
+
+        let dbPassword: string | undefined = undefined
+
+        if (password) {
+            dbPassword = password
+        } else if (profile.passwordEnc) {
+            try {
+                dbPassword = this.encryptionService.decryptSecret(profile.passwordEnc)
+            } catch (err) {
+                throw new BadGatewayException('Failed to decrypt database password, please provide it in the request body')
+            }
+        } else {
+            throw new BadRequestException('No password provided for connection profile')
+        }
+
+        const config: PostgresConnectionConfig = {
+            driver: profile.driver,
+            host: profile.host,
+            port: profile.port,
+            database: profile.database,
+            user: profile.user,
+            password: dbPassword,
+            ssl: profile.ssl ?? undefined,
+        }
+
+        return this.createConnection(config)
     }
 
     getDriver(connectionId: string): DatabaseDriver {

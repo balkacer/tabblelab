@@ -1,4 +1,4 @@
-import { PostgresConnectionConfig } from '@tabblelab/database-core'
+import { PostgresConnectionConfig, SupportedDatabase, supportedDrivers } from '@tabblelab/database-core'
 import {
     IsString,
     IsNumber,
@@ -8,8 +8,8 @@ import {
 } from 'class-validator'
 
 export class CreateConnectionDto implements PostgresConnectionConfig {
-    @IsIn(['postgres'])
-    type!: 'postgres'
+    @IsIn(supportedDrivers)
+    driver!: SupportedDatabase
 
     @IsString()
     host!: string
@@ -29,8 +29,15 @@ export class CreateConnectionDto implements PostgresConnectionConfig {
     @IsOptional()
     @IsBoolean()
     ssl?: boolean
+}
+
+export class CreateConnectionFromProfileDto {
+    @IsString()
+    profileConnectionId!: string
 
     @IsOptional()
     @IsString()
-    name?: string
+    password?: string
 }
+
+export type CreateConnectionRequestDto = CreateConnectionDto | CreateConnectionFromProfileDto

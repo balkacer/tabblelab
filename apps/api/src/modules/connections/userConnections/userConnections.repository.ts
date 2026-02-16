@@ -13,6 +13,7 @@ export type UserConnectionRow = {
     host: string
     port: number
     database: string
+    passwordEnc: string | null
     user: string
     ssl: boolean | null
     createdAt: string
@@ -28,6 +29,7 @@ export type UpsertUserConnectionInput = {
     port: number
     database: string
     user: string
+    passwordEnc?: string
     ssl?: boolean
 }
 
@@ -100,6 +102,7 @@ export class UserConnectionsRepository implements OnModuleInit {
                 port,
                 database,
                 db_user as "user",
+                password_enc as "passwordEnc",
                 ssl,
                 created_at as "createdAt",
                 updated_at as "updatedAt",
@@ -127,9 +130,9 @@ export class UserConnectionsRepository implements OnModuleInit {
         await this.pool.query(
             `
             INSERT INTO user_connections
-                (id, user_id, driver, name, host, port, database, db_user, ssl, created_at, updated_at, last_used_at)
+                (id, user_id, driver, name, host, port, database, db_user, password_enc, ssl, created_at, updated_at, last_used_at)
             VALUES
-                ($1, $2, $3, $4, $5, $6, $7, $8, $9, COALESCE($10, now()), $11, $12)
+                ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, COALESCE($11, now()), $12, $13)
             ON CONFLICT (id)
             DO UPDATE SET
                 user_id = EXCLUDED.user_id,
@@ -139,6 +142,7 @@ export class UserConnectionsRepository implements OnModuleInit {
                 port = EXCLUDED.port,
                 database = EXCLUDED.database,
                 db_user = EXCLUDED.db_user,
+                password_enc = EXCLUDED.password_enc,
                 ssl = EXCLUDED.ssl,
                 updated_at = EXCLUDED.updated_at,
                 last_used_at = EXCLUDED.last_used_at
@@ -152,6 +156,7 @@ export class UserConnectionsRepository implements OnModuleInit {
                 input.port,
                 input.database,
                 input.user,
+                input.passwordEnc ?? null,
                 input.ssl ?? null,
                 null, // created_at only set for inserts
                 now,

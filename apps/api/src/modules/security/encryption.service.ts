@@ -1,7 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { randomBytes, createCipheriv, createDecipheriv } from 'crypto'
-import { EncryptedData } from './encryption.types'
 
 @Injectable()
 export class EncryptionService {
@@ -24,38 +23,30 @@ export class EncryptionService {
     }
   }
 
-  encrypt(plainText: string): EncryptedData {
+  encryptSecret(plain: string): string {
     const iv = randomBytes(12)
     const cipher = createCipheriv(this.algorithm, this.key, iv)
 
-    const encrypted = Buffer.concat([
-      cipher.update(plainText, 'utf8'),
-      cipher.final(),
-    ])
+    const ciphertext = Buffer.concat([cipher.update(plain, 'utf8'), cipher.final()])
+    const tag = cipher.getAuthTag()
 
-    const authTag = cipher.getAuthTag()
-
-    return {
-      ciphertext: encrypted.toString('base64'),
-      iv: iv.toString('base64'),
-      authTag: authTag.toString('base64'),
-    }
+    return `v1:${iv.toString('base64')}:${tag.toString('base64')}:${ciphertext.toString('base64')}`
   }
 
-  decrypt(encryptedData: EncryptedData): string {
-    const decipher = createDecipheriv(
-      this.algorithm,
-      this.key,
-      Buffer.from(encryptedData.iv, 'base64'),
-    )
+  decryptSecret(payload: string): string {
+    const [v, ivB64, tagB64, ctB64] = payload.split(':')
+    if (v !== 'v1' || !ivB64 || !tagB64 || !ctB64) {
+      throw new Error('Invalid encrypted payload format')
+    }
 
-    decipher.setAuthTag(Buffer.from(encryptedData.authTag, 'base64'))
+    const iv = Buffer.from(ivB64, 'base64')
+    const tag = Buffer.from(tagB64, 'base64')
+    const ciphertext = Buffer.from(ctB64, 'base64')
 
-    const decrypted = Buffer.concat([
-      decipher.update(Buffer.from(encryptedData.ciphertext, 'base64')),
-      decipher.final(),
-    ])
+    const decipher = createDecipheriv(this.algorithm, this.key, iv)
+    decipher.setAuthTag(tag)
 
-    return decrypted.toString('utf8')
+    const plain = Buffer.concat([decipher.update(ciphertext), decipher.final()])
+    return plain.toString('utf8')
   }
 }

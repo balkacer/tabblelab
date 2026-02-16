@@ -8,9 +8,10 @@ import {
     Req,
     HttpCode,
     NotFoundException,
+    UnauthorizedException,
 } from '@nestjs/common'
 import { ConnectionManager } from './connection.manager'
-import { CreateConnectionDto } from './dto/create-connection.dto'
+import { CreateConnectionRequestDto } from './dto/create-connection.dto'
 import { QueryDto } from './dto/query.dto'
 import { Request } from 'express'
 
@@ -20,8 +21,21 @@ export class ConnectionsController {
         private readonly connectionManager: ConnectionManager,
     ) { }
 
+    private requireUserId(req: Request): string {
+        const userId = (req as any)?.user?.sub
+        if (!userId) throw new UnauthorizedException('Authentication required')
+        return String(userId)
+    }
+
     @Post()
-    async create(@Body() dto: CreateConnectionDto) {
+    async create(@Body() dto: CreateConnectionRequestDto, @Req() req: Request) {
+        if ('profileConnectionId' in dto) {
+            const userId = this.requireUserId(req)
+            const profileId = String(dto.profileConnectionId)
+            const id = await this.connectionManager.createConnectionFromProfile(profileId, userId, dto.password)
+            return { connectionId: id }
+        }
+
         const id = await this.connectionManager.createConnection(dto)
 
         return {

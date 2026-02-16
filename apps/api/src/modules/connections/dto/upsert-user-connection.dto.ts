@@ -24,6 +24,9 @@ export class UpsertUserConnectionDto {
     @IsString()
     user!: string
 
+    @IsString()
+    password?: string
+
     @IsOptional()
     @IsBoolean()
     ssl?: boolean

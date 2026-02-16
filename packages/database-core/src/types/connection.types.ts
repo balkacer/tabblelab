@@ -3,12 +3,12 @@ export const supportedDrivers = ['postgres'] as const
 export type SupportedDatabase = typeof supportedDrivers[number]
 
 export interface BaseConnectionConfig {
-    type: SupportedDatabase
+    driver: SupportedDatabase
     name?: string
 }
 
 export interface PostgresConnectionConfig extends BaseConnectionConfig {
-    type: 'postgres'
+    driver: 'postgres'
     host: string
     port: number
     database: string
