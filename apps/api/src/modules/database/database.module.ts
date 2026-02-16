@@ -6,12 +6,12 @@ import { Pool } from 'pg'
         {
             provide: 'INTERNAL_PG_POOL',
             useFactory: () => {
-                const host = process.env.INTERNAL_DB_HOST ?? process.env.POSTGRES_HOST ?? 'db'
-                const port = Number(process.env.INTERNAL_DB_PORT ?? process.env.POSTGRES_PORT ?? 5432)
-                const user = process.env.INTERNAL_DB_USER ?? process.env.POSTGRES_USER ?? 'postgres'
+                const host = process.env.TABBLELAB_INTERNAL_DB_HOST ?? ''
+                const port = Number(process.env.TABBLELAB_INTERNAL_DB_PORT ?? 0)
+                const user = process.env.TABBLELAB_INTERNAL_DB_USER ?? ''
                 const password =
-                    process.env.INTERNAL_DB_PASSWORD ?? process.env.POSTGRES_PASSWORD ?? 'postgres'
-                const database = process.env.INTERNAL_DB_NAME ?? process.env.POSTGRES_DB ?? 'tabblelab'
+                    process.env.TABBLELAB_INTERNAL_DB_PASSWORD ?? ''
+                const database = process.env.TABBLELAB_INTERNAL_DB_NAME ?? ''
 
                 return new Pool({
                     host,
@@ -19,7 +19,7 @@ import { Pool } from 'pg'
                     user,
                     password,
                     database,
-                    max: Number(process.env.INTERNAL_DB_POOL_MAX ?? 10),
+                    max: Number(process.env.TABBLELAB_INTERNAL_DB_POOL_MAX ?? 10),
                 })
             },
         },
