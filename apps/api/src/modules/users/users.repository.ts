@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common'
 import { Pool } from 'pg'
 
 export type UserRow = {
@@ -9,8 +9,21 @@ export type UserRow = {
 }
 
 @Injectable()
-export class UsersRepository {
+export class UsersRepository implements OnModuleInit {
     constructor(@Inject('INTERNAL_PG_POOL') private readonly pool: Pool) { }
+
+    async onModuleInit() {
+        await this.pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                email text UNIQUE NOT NULL,
+                password_hash text NOT NULL,
+                created_at timestamptz NOT NULL DEFAULT now()
+            );
+
+            CREATE EXTENSION IF NOT EXISTS pgcrypto;
+        `)
+    }
 
     async findByEmail(email: string): Promise<UserRow | null> {
         const res = await this.pool.query<UserRow>(
