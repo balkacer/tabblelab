@@ -39,17 +39,22 @@ function mapRow(row: UserConnectionRow): UserConnectionProfile {
     }
 }
 
+function mapNoPasswordRow(row: Omit<UserConnectionRow, 'passwordEnc'> | UserConnectionRow): Omit<UserConnectionProfile, 'passwordEnc'> {
+    const { passwordEnc, ...rest } = mapRow({ ...row, passwordEnc: null })
+    return rest
+}
+
 @Injectable()
 export class UserConnectionsService {
     constructor(private readonly repo: UserConnectionsRepository,
         private readonly encryptionService: EncryptionService
     ) { }
 
-    async list(userId: string): Promise<UserConnectionProfile[]> {
+    async list(userId: string): Promise<Omit<UserConnectionProfile, 'passwordEnc'>[]> {
         const uid = normalizeString(userId)
         if (!uid) throw new BadRequestException('Invalid userId')
         const rows = await this.repo.listByUserId(uid)
-        return rows.map(mapRow)
+        return rows.map(mapNoPasswordRow)
     }
 
     async getById(userId: string, profileId: string): Promise<UserConnectionProfile> {

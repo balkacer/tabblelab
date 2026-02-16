@@ -63,7 +63,7 @@ export class UserConnectionsRepository implements OnModuleInit {
      * List saved connection profiles for a given user.
      * NOTE: This does NOT include any password. Passwords should be re-entered or stored separately encrypted later.
      */
-    async listByUserId(userId: string): Promise<UserConnectionRow[]> {
+    async listByUserId(userId: string): Promise<Omit<UserConnectionRow, 'passwordEnc'>[]> {
         const { rows } = await this.pool.query(
             `
             SELECT
@@ -87,7 +87,7 @@ export class UserConnectionsRepository implements OnModuleInit {
         )
 
         // pg returns timestamps as strings depending on driver config; we keep them as strings for transport
-        return rows as UserConnectionRow[]
+        return rows as Omit<UserConnectionRow, 'passwordEnc'>[]
     }
 
     async findById(userId: string, id: string): Promise<UserConnectionRow | null> {
