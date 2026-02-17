@@ -1,10 +1,8 @@
 import { Pool } from 'pg'
 import {
     DatabaseDriver,
-    QueryOptions,
-    QueryResult,
 } from '@tabblelab/database-core'
-import { BadRequestException, ForbiddenException } from '@nestjs/common'
+import { ForbiddenException } from '@nestjs/common'
 import { randomUUID } from 'crypto'
 
 export class PostgresDriver implements DatabaseDriver {
@@ -21,13 +19,38 @@ export class PostgresDriver implements DatabaseDriver {
     }) { }
 
     private normalizeSql(sql: string) {
+        // trim + remove trailing semicolons
         return sql.trim().replace(/;+\s*$/, '')
     }
 
+    private stripLeadingComments(sql: string) {
+        // Remove leading whitespace + SQL comments repeatedly:
+        //  - line comments: -- ... \n
+        //  - block comments: /* ... */
+        let s = sql
+        // repeat until stable
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            const before = s
+            s = s.replace(/^\s+/, '')
+            s = s.replace(/^--[^\n]*\n\s*/m, '')
+            s = s.replace(/^\/\*[\s\S]*?\*\/\s*/, '')
+            if (s === before) break
+        }
+        return s
+    }
+
+    private getFirstKeyword(sql: string) {
+        const s = this.stripLeadingComments(sql).trim().toLowerCase()
+        // first token (letters/underscore)
+        const m = s.match(/^([a-z_]+)/)
+        return m?.[1] ?? ''
+    }
+
     private enforceSelectOnly(sql: string) {
-        const s = sql.trim().toLowerCase()
-        if (!s.startsWith('select') && !s.startsWith('with')) {
-            // WITH ... SELECT
+        const kw = this.getFirstKeyword(sql)
+        if (kw !== 'select' && kw !== 'with') {
+            // WITH ... SELECT is allowed
             throw new ForbiddenException({
                 code: 'SAFE_MODE_BLOCKED',
                 action: 'AUTH_REQUIRED_FOR_UNSAFE_MODE',
@@ -68,12 +91,18 @@ export class PostgresDriver implements DatabaseDriver {
 
         // defaults/env
         const defaultTimeoutMs = Number(process.env.TABBLELAB_DEFAULT_TIMEOUT_MS ?? 8000)
+        const maxTimeoutMs = Number(process.env.TABBLELAB_MAX_TIMEOUT_MS ?? 60_000)
+
+        const defaultRowLimit = Number(process.env.TABBLELAB_DEFAULT_ROW_LIMIT ?? 1000)
         const maxRowLimit = Number(process.env.TABBLELAB_MAX_ROW_LIMIT ?? 1000)
+
         const defaultSafeMode = String(process.env.TABBLELAB_SAFE_MODE ?? 'true') === 'true'
 
-        const timeoutMs = Math.max(1, opts?.timeoutMs ?? defaultTimeoutMs)
-        const requestedLimit = opts?.rowLimit ?? maxRowLimit
-        const rowLimit = Math.min(Math.max(1, requestedLimit), maxRowLimit)
+        const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
+
+        const timeoutMs = clamp(Math.floor(opts?.timeoutMs ?? defaultTimeoutMs), 1, maxTimeoutMs)
+        const requestedLimit = Math.floor(opts?.rowLimit ?? defaultRowLimit)
+        const rowLimit = clamp(requestedLimit, 1, maxRowLimit)
         const safeMode = opts?.safeMode ?? defaultSafeMode
 
         const cleanSql = this.normalizeSql(sql)

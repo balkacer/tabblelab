@@ -32,6 +32,18 @@ export function QueryPage() {
     const abortRef = useRef<AbortController | null>(null)
     const [safeMode, setSafeMode] = useState(true)
 
+    const MAX_ROW_LIMIT = 5000
+    const MAX_TIMEOUT_MS = 60 * 1000 // hard cap (1 min)
+    const MIN_TIMEOUT_MS = 2 * 1000  // avoid tiny values that cause confusion
+
+    const [rowLimit, setRowLimit] = useState<number>(1000)
+    const [timeoutMs, setTimeoutMs] = useState<number>(60 * 1000)
+
+    const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
+
+    const effectiveRowLimit = clamp(Number.isFinite(rowLimit) ? rowLimit : 1000, 1, MAX_ROW_LIMIT)
+    const effectiveTimeoutMs = clamp(Number.isFinite(timeoutMs) ? timeoutMs : 60 * 1000, MIN_TIMEOUT_MS, MAX_TIMEOUT_MS)
+
     const runQuery = async () => {
         if (!connectionId) return
 
@@ -54,8 +66,8 @@ export function QueryPage() {
                 `/connections/${connectionId}/query`,
                 {
                     sql,
-                    timeoutMs: 60 * 1000, // 1 minute
-                    rowLimit: 1000,
+                    timeoutMs: effectiveTimeoutMs,
+                    rowLimit: effectiveRowLimit,
                     safeMode,
                 },
                 { signal: controller.signal },
@@ -128,7 +140,9 @@ export function QueryPage() {
             sidebar={
                 <Sidebar
                     onSelectTable={(schema, table) => {
-                        setSql(`SELECT * FROM ${tableRef(schema, table)} LIMIT 100;`)
+                        setSql(
+                            `SELECT * FROM ${tableRef(schema, table)} LIMIT ${effectiveRowLimit};`,
+                        )
                     }}
                     onInsertColumn={(schema, table, column) => {
                         appendSql(columnRef(schema, table, column))
@@ -178,6 +192,53 @@ export function QueryPage() {
                                     </div>
                                 ) : null}
                             </div>
+
+                            <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 rounded border border-neutral-800 bg-neutral-900 px-2 py-1">
+                                    <label className="text-[11px] text-neutral-400" title={`Max ${MAX_ROW_LIMIT}`}>
+                                        Rows
+                                    </label>
+                                    <input
+                                        inputMode="numeric"
+                                        className="w-20 bg-transparent text-xs text-neutral-100 outline-none"
+                                        value={String(rowLimit)}
+                                        onChange={(e) => {
+                                            const v = e.target.value.trim()
+                                            if (v === '') return setRowLimit(0)
+                                            const n = Number(v)
+                                            if (!Number.isFinite(n)) return
+                                            setRowLimit(Math.floor(n))
+                                        }}
+                                        onBlur={() => {
+                                            setRowLimit(effectiveRowLimit)
+                                        }}
+                                        placeholder="1000"
+                                        title={`Row limit (1–${MAX_ROW_LIMIT})`}
+                                    />
+                                    <span className="text-[11px] text-neutral-500">/ {MAX_ROW_LIMIT}</span>
+                                </div>
+
+                                <div className="flex items-center gap-2 rounded border border-neutral-800 bg-neutral-900 px-2 py-1">
+                                    <label className="text-[11px] text-neutral-400" title={`Max ${Math.round(MAX_TIMEOUT_MS / 1000)}s`}>
+                                        Timeout
+                                    </label>
+                                    <select
+                                        className="bg-transparent text-xs text-neutral-100 outline-none"
+                                        value={String(timeoutMs)}
+                                        onChange={(e) => {
+                                            const n = Number(e.target.value)
+                                            if (Number.isFinite(n)) setTimeoutMs(n)
+                                        }}
+                                        title={`Timeout (min ${Math.round(MIN_TIMEOUT_MS / 1000)}s, max ${Math.round(MAX_TIMEOUT_MS / 1000)}s)`}
+                                    >
+                                        <option value={String(5 * 1000)}>5s</option>
+                                        <option value={String(15 * 1000)}>15s</option>
+                                        <option value={String(30 * 1000)}>30s</option>
+                                        <option value={String(60 * 1000)}>60s</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <button
                                 onClick={runQuery}
                                 disabled={isRunning}
@@ -235,6 +296,13 @@ export function QueryPage() {
                                             {result.executionTimeMs} ms
                                         </span>
                                     ) : null}
+
+                                    <span className="rounded border border-neutral-800 bg-neutral-900 px-2 py-0.5">
+                                        limit {effectiveRowLimit}
+                                    </span>
+                                    <span className="rounded border border-neutral-800 bg-neutral-900 px-2 py-0.5">
+                                        timeout {Math.round(effectiveTimeoutMs / 1000)}s
+                                    </span>
                                 </>
                             ) : (
                                 <span className="text-neutral-500">No results</span>
