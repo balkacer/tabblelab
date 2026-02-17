@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useAuthStore } from "../store/auth.store"
 
 export function AuthBadge() {
+    const navigate = useNavigate();
     const user = useAuthStore((s) => s.user)
     const logout = useAuthStore((s) => s.logout)
 
@@ -14,7 +15,10 @@ export function AuthBadge() {
                     </span>
                     <button
                         type="button"
-                        onClick={() => logout()}
+                        onClick={() => {
+                            logout()
+                                .then(() => navigate('/connect'))
+                        }}
                         className="rounded border border-neutral-800 bg-neutral-900 px-3 py-1 hover:bg-neutral-800 text-neutral-200"
                     >
                         Logout
