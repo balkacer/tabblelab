@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
-import { api } from '../api/client'
 import { useConnectionStore } from '../store/connection.store'
 import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../store/auth.store'
+import { openConnectionFromLocal, openConnectionFromProfile } from '../api/connections'
+import {
+  createProfileConnection,
+  deleteProfileConnection,
+  getProfileConnections,
+} from '../api/profileConnections'
 
 export function ConnectionPage() {
   const setConnectionId = useConnectionStore((s) => s.setConnectionId)
@@ -13,6 +19,14 @@ export function ConnectionPage() {
   const addOrUpdateSaved = useConnectionStore((s) => s.addOrUpdateSaved)
   const removeSaved = useConnectionStore((s) => s.removeSaved)
   const renameSaved = useConnectionStore((s) => s.renameSaved)
+
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
+  const profileConnections = useConnectionStore((s) => s.profileConnections)
+  const setProfileConnections = useConnectionStore((s) => s.setProfileConnections)
+  const renameProfileConnectionLocal = useConnectionStore((s) => s.renameProfileConnectionLocal)
+  const removeProfileConnectionLocal = useConnectionStore((s) => s.removeProfileConnectionLocal)
+  const touchProfileConnectionLocal = useConnectionStore((s) => s.touchProfileConnectionLocal)
 
   const [form, setForm] = useState({
     name: '',
@@ -39,8 +53,37 @@ export function ConnectionPage() {
   }, [connectionId, navigate])
 
   useEffect(() => {
-    hydrateSaved()
-  }, [hydrateSaved])
+    if (!isAuthenticated) {
+      hydrateSaved()
+      return
+    }
+
+    let cancelled = false
+    getProfileConnections()
+      .then((rows) => {
+        if (cancelled) return
+        setProfileConnections(
+          rows.map((r: any) => ({
+            id: String(r.id),
+            driver: 'postgres',
+            name: String(r.name ?? ''),
+            host: String(r.host ?? ''),
+            port: Number(r.port ?? 0),
+            database: String(r.database ?? ''),
+            user: String(r.user ?? ''),
+            createdAt: r.createdAt ? String(r.createdAt) : undefined,
+            lastUsedAt: r.lastUsedAt ? String(r.lastUsedAt) : undefined,
+          })),
+        )
+      })
+      .catch(() => {
+        // ignore, page can still be used
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [hydrateSaved, isAuthenticated, setProfileConnections])
 
   const handleConnect = async () => {
     if (isConnecting) return
@@ -58,26 +101,61 @@ export function ConnectionPage() {
 
     setIsConnecting(true)
     try {
-      const res = await api.post('/connections', {
-        type: 'postgres',
-        name: effectiveAlias,
-        host: form.host.trim(),
-        port: Number(form.port),
-        database: form.database.trim(),
-        user: form.user.trim(),
-        password: form.password,
-      })
+      let connectionIdRes: { connectionId: string }
 
-      setConnectionId(res.data.connectionId)
+      if (isAuthenticated) {
+        const profile = await createProfileConnection({
+          driver: 'postgres',
+          name: effectiveAlias,
+          host: form.host.trim(),
+          port: Number(form.port),
+          database: form.database.trim(),
+          user: form.user.trim(),
+          password: form.password,
+        })
+
+        connectionIdRes = await openConnectionFromProfile(profile.id)
+
+        touchProfileConnectionLocal(profile.id)
+        getProfileConnections()
+          .then((rows) => {
+            setProfileConnections(
+              rows.map((r: any) => ({
+                id: String(r.id),
+                driver: 'postgres',
+                name: String(r.name ?? ''),
+                host: String(r.host ?? ''),
+                port: Number(r.port ?? 0),
+                database: String(r.database ?? ''),
+                user: String(r.user ?? ''),
+                createdAt: r.createdAt ? String(r.createdAt) : undefined,
+                lastUsedAt: r.lastUsedAt ? String(r.lastUsedAt) : undefined,
+              })),
+            )
+          })
+          .catch(() => { })
+      } else {
+        connectionIdRes = await openConnectionFromLocal({
+          driver: 'postgres',
+          host: form.host.trim(),
+          port: Number(form.port),
+          database: form.database.trim(),
+          user: form.user.trim(),
+          password: form.password,
+        })
+
+        addOrUpdateSaved({
+          driver: 'postgres',
+          name: effectiveAlias,
+          host: form.host.trim(),
+          port: Number(form.port),
+          database: form.database.trim(),
+          user: form.user.trim(),
+        })
+      }
+
+      setConnectionId(connectionIdRes.connectionId)
       setConnectionMeta({ driver: 'postgres', name: effectiveAlias })
-
-      addOrUpdateSaved({
-        name: effectiveAlias,
-        host: form.host.trim(),
-        port: Number(form.port),
-        database: form.database.trim(),
-        user: form.user.trim(),
-      })
     } catch (err: any) {
       const message =
         err?.response?.data?.message ??
@@ -113,15 +191,17 @@ export function ConnectionPage() {
           </div>
         ) : null}
 
-        {saved.length > 0 ? (
+        {(isAuthenticated ? profileConnections.length : saved.length) > 0 ? (
           <div className="mt-5">
             <div className="flex items-center justify-between">
               <div className="text-sm font-medium text-neutral-200">Saved connections</div>
-              <div className="text-xs text-neutral-500">Passwords are never saved</div>
+              <div className="text-xs text-neutral-500">
+                {isAuthenticated ? 'Saved to your account (no passwords shown)' : 'Saved locally (no passwords)'}
+              </div>
             </div>
 
             <div className="mt-3 space-y-2">
-              {saved.map((p) => (
+              {(isAuthenticated ? profileConnections : saved).map((p) => (
                 <div
                   key={p.id}
                   className="flex items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-950 p-3"
@@ -140,7 +220,6 @@ export function ConnectionPage() {
                       type="button"
                       className="text-xs rounded border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 px-3 py-1"
                       onClick={() => {
-                        // prefill form (password se queda vacío)
                         setForm((f) => ({
                           ...f,
                           name: p.name,
@@ -159,9 +238,35 @@ export function ConnectionPage() {
                     <button
                       type="button"
                       className="text-xs rounded border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 px-3 py-1"
-                      onClick={() => {
+                      onClick={async () => {
                         const newAlias = prompt('New alias', p.name)
-                        if (newAlias && newAlias.trim()) renameSaved(p.id, newAlias.trim())
+                        if (!newAlias || !newAlias.trim()) return
+                        const name = newAlias.trim()
+
+                        if (!isAuthenticated) {
+                          renameSaved(p.id, name)
+                          return
+                        }
+
+                        try {
+                          await createProfileConnection({
+                            id: p.id,
+                            driver: 'postgres',
+                            name,
+                            host: p.host,
+                            port: Number(p.port),
+                            database: p.database,
+                            user: p.user,
+                          } as any)
+
+                          renameProfileConnectionLocal(p.id, name)
+                        } catch (err: any) {
+                          const message =
+                            err?.response?.data?.message ??
+                            err?.message ??
+                            'Failed to rename connection.'
+                          setError(String(message))
+                        }
                       }}
                       title="Rename"
                     >
@@ -171,8 +276,24 @@ export function ConnectionPage() {
                     <button
                       type="button"
                       className="text-xs rounded border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 px-3 py-1 text-red-200"
-                      onClick={() => {
-                        if (confirm(`Delete saved connection "${p.name}"?`)) removeSaved(p.id)
+                      onClick={async () => {
+                        if (!confirm(`Delete saved connection "${p.name}"?`)) return
+
+                        if (!isAuthenticated) {
+                          removeSaved(p.id)
+                          return
+                        }
+
+                        try {
+                          await deleteProfileConnection(p.id)
+                          removeProfileConnectionLocal(p.id)
+                        } catch (err: any) {
+                          const message =
+                            err?.response?.data?.message ??
+                            err?.message ??
+                            'Failed to delete connection.'
+                          setError(String(message))
+                        }
                       }}
                       title="Delete"
                     >
