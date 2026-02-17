@@ -99,22 +99,16 @@ Planned:
 ```bash
 git clone https://github.com/your-username/tabblelab.git
 cd tabblelab
-docker compose up
+pnpm docker
 ```
 
-Then open:
+Then in the browser, open:
 
 ```bash
-http://localhost:3000
+http://localhost:5173
 ```
 
-## 🛠 Development
-
-**Requirements**
-
-- Node.js 20+
-- pnpm
-- Docker (optional)
+## Run Locally
 
 **Install**
 
@@ -134,19 +128,35 @@ pnpm dev:api
 pnpm dev:web
 ```
 
+## 🛠 Development
+
+**Requirements**
+
+- Node.js 20+
+- pnpm
+- Docker (optional)
+
 ## 🧪 API Testing (Postman)
 
 TabbleLab includes a ready-to-use Postman collection for local development.
 
-You can find it here: [TabbleLab Postman Collection](https://altarlink.postman.co/workspace/CIAM~4d8cfcbb-286f-482d-9c66-f82a9b335d46/collection/30447307-b7ce3cd5-b426-4e84-a06b-816c604e072f?action=share&creator=30447307&active-environment=30447307-28dd5f85-c186-44cc-9971-868c0e9ab618)
+You can find it here: [TabbleLab Postman Collection](./postman/collections/TabbleLab%20API.postman_collection.json)
 
 ### How to use
 
 1. Import the collection into Postman.
 2. Set the collection variables:
-   - `baseUrl` → `http://localhost:4000`
-   - `dbHost` → `localhost`
-   - `dbPassword` → `your_db_password`
+   - `baseURL` → `http://0.0.0.0:4000`
+   - `connectionId` → `1`
+   - `dbPassword` → `postgres`
+   - `dbHost` → `db`
+   - `dbName` → `tabblelab`
+   - `dbUser` → `postgres`
+   - `dbPort` → `5432`
+   - `queryId` → `1`
+   - `testEmail` → `test@tabblelab3.com`
+   - `testPassword` → `12345678`
+   - `profileConnectionId` → `1`
 3. Run:
    - Create Connection
    - List Tables
