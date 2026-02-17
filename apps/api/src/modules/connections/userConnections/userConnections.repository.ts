@@ -157,8 +157,8 @@ export class UserConnectionsRepository implements OnModuleInit {
                 input.database,
                 input.user,
                 input.passwordEnc ?? null,
-                input.ssl ?? null,
-                null, // created_at only set for inserts
+                input.ssl ?? false,
+                null,
                 now,
                 now,
             ],
