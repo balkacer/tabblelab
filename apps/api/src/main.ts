@@ -10,22 +10,19 @@ async function bootstrap() {
 
   app.useGlobalFilters(new GlobalExceptionFilter())
 
-  const allowedOrigins = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-  ]
+  app.use(cookieParser())
 
   app.enableCors({
     origin: (origin: string, callback: (arg0: Error | null, arg1: boolean) => any) => {
-      // Permite tools sin origin (curl, postman)
+
+      const allowedOrigins = (process.env.TABBLELAB_CORS_ORIGINS ?? '').split(',').map(s => s.trim()).filter(Boolean)
+
       if (!origin) return callback(null, true)
       if (allowedOrigins.includes(origin)) return callback(null, true)
       return callback(new Error(`CORS blocked for origin: ${origin}`), false)
     },
     credentials: true,
   })
-
-  app.use(cookieParser())
 
   app.useGlobalPipes(
     new ValidationPipe({

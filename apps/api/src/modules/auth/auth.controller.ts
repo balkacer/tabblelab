@@ -22,7 +22,9 @@ export class AuthController {
 
     @Post('logout')
     logout(@Res({ passthrough: true }) res: Response) {
-        res.clearCookie(process.env.TABBLELAB_AUTH_COOKIE_NAME ?? 'tabblelab_token')
+        res.clearCookie(process.env.TABBLELAB_AUTH_COOKIE_NAME ?? 'tabblelab_token', {
+            path: '/',
+        })
         return { ok: true }
     }
 

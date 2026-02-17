@@ -3,7 +3,7 @@ import { ProfileConnection } from '../types/profileConnections.type'
 import { api } from './client'
 
 export async function getProfileConnections() {
-    const { data } = await api.get(`/profiles-connections`)
+    const { data } = await api.get(`/profile-connections`)
     return data as ProfileConnection[]
 }
 
