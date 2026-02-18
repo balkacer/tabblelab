@@ -8,7 +8,7 @@ export interface BaseConnectionConfig {
 }
 
 export interface PostgresConnectionConfig extends BaseConnectionConfig {
-    driver: 'postgres'
+    driver: SupportedDatabase
     host: string
     port: number
     database: string
