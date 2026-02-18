@@ -12,6 +12,7 @@ import { Pool } from 'pg'
                 const password =
                     process.env.TABBLELAB_INTERNAL_DB_PASSWORD ?? ''
                 const database = process.env.TABBLELAB_INTERNAL_DB_NAME ?? ''
+                const sslEnabled = process.env.TABBLELAB_INTERNAL_DB_SSL === 'true'
 
                 return new Pool({
                     host,
@@ -20,6 +21,7 @@ import { Pool } from 'pg'
                     password,
                     database,
                     max: Number(process.env.TABBLELAB_INTERNAL_DB_POOL_MAX ?? 10),
+                    ssl: sslEnabled ? { rejectUnauthorized: false } : false,
                 })
             },
         },
