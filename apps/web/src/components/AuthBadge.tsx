@@ -17,7 +17,7 @@ export function AuthBadge() {
                         type="button"
                         onClick={() => {
                             logout()
-                                .then(() => navigate('/connect'))
+                            navigate('/connect', { replace: true })
                         }}
                         className="rounded border border-neutral-800 bg-neutral-900 px-3 py-1 hover:bg-neutral-800 text-neutral-200"
                     >
