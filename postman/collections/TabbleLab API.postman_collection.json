@@ -143,7 +143,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"driver\": \"postgres\",\n    \"host\": \"{{dbHost}}\",\n    \"port\": {{dbPort}},\n    \"database\": \"{{dbName}}\",\n    \"user\": \"{{dbUser}}\",\n    \"password\": \"{{dbPassword}}\",\n    \"ssl\": false\n}",
+              "raw": "{\n    \"driver\": \"postgres\",\n    \"host\": \"{{dbHost}}\",\n    \"port\": {{dbPort}},\n    \"database\": \"{{dbName}}\",\n    \"user\": \"{{dbUser}}\",\n    \"password\": \"{{dbPassword}}\",\n    \"ssl\": \"{{dbSSL}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
