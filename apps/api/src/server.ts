@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { NestFactory } from '@nestjs/core'
 import { ExpressAdapter } from '@nestjs/platform-express'
 import type { INestApplication } from '@nestjs/common'
