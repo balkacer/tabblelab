@@ -68,9 +68,6 @@ importers:
       '@nestjs/platform-express':
         specifier: ^11.1.13
         version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
-      '@tabblelab/database-core':
-        specifier: file:../../packages/database-core
-        version: link:../../packages/database-core
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0
@@ -202,8 +199,6 @@ importers:
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@24.10.13)(jiti@2.6.1)(lightningcss@1.30.2)
-
-  packages/database-core: {}
 
 packages:
 
