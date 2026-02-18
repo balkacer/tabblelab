@@ -7,6 +7,7 @@ import { HealthModule } from './modules/health/health.module'
 import { AuthContextMiddleware } from './common/middleware/auth-context.middleware'
 import { AuthModule } from './modules/auth/auth.module'
 import { DatabaseModule } from './modules/database/database.module'
+import { AppController } from './app.controller'
 
 @Module({
     imports: [
@@ -20,6 +21,7 @@ import { DatabaseModule } from './modules/database/database.module'
         DatabaseModule,
         AuthModule,
     ],
+    controllers: [AppController],
 })
 export class AppModule {
     configure(consumer: MiddlewareConsumer) {
