@@ -46,7 +46,7 @@ services:
       timeout: 15s
       start_period: 20s
       retries: 10
-    command: ["sh", "-lc", "pnpm config set store-dir /pnpm-store && pnpm config set package-import-method copy && pnpm install --frozen-lockfile && pnpm --filter @tabblelab/database-core build && pnpm --filter api dev"]
+    command: ["sh", "-lc", "pnpm config set store-dir /pnpm-store && pnpm config set package-import-method copy && pnpm install --frozen-lockfile && pnpm --filter api dev"]
 
   web:
     build:

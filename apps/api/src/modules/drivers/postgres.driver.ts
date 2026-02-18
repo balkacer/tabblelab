@@ -1,7 +1,7 @@
 import { Pool } from 'pg'
 import {
     DatabaseDriver,
-} from '@tabblelab/database-core'
+} from '../../common/types/database-driver.interface'
 import { ForbiddenException } from '@nestjs/common'
 import { randomUUID } from 'crypto'
 

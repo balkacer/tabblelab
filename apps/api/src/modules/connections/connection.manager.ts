@@ -1,9 +1,7 @@
 import { BadGatewayException, BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { randomUUID } from 'crypto'
-import {
-    PostgresConnectionConfig,
-    DatabaseDriver,
-} from '@tabblelab/database-core'
+import { DatabaseDriver } from '../../common/types/database-driver.interface'
+import { PostgresConnectionConfig } from '../../common/types/connection.types'
 import { PostgresDriver } from '../drivers/postgres.driver'
 import { UserConnectionsService } from './userConnections/userConnections.service'
 import { EncryptionService } from '../security/encryption.service'

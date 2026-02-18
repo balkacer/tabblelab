@@ -3,7 +3,7 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common'
 import { Pool } from 'pg'
 import { randomUUID } from 'crypto'
-import { SupportedDatabase } from '@tabblelab/database-core'
+import { SupportedDatabase } from '../../../common/types/connection.types'
 
 export type UserConnectionRow = {
     id: string

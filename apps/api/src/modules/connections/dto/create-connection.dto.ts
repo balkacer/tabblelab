@@ -1,4 +1,4 @@
-import { PostgresConnectionConfig, SupportedDatabase, supportedDrivers } from '@tabblelab/database-core'
+import { PostgresConnectionConfig, SupportedDatabase, supportedDrivers } from '../../../common/types/connection.types'
 import {
     IsString,
     IsNumber,

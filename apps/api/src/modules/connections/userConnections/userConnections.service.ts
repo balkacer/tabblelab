@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { UserConnectionsRepository, UserConnectionRow } from './userConnections.repository'
 import { UpsertUserConnectionDto } from '../dto/upsert-user-connection.dto'
-import { SupportedDatabase, supportedDrivers } from '@tabblelab/database-core'
+import { SupportedDatabase, supportedDrivers } from '../../../common/types/connection.types'
 import { EncryptionService } from '../../security/encryption.service'
 
 export type UserConnectionProfile = Omit<UserConnectionRow, 'userId'>
