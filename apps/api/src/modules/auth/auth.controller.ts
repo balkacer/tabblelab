@@ -41,7 +41,7 @@ export class AuthController {
 
         res.cookie(name, token, {
             httpOnly: true,
-            sameSite: 'lax',
+            sameSite: secure ? 'none' : 'lax',
             secure,
             path: '/',
             // domain: optional
