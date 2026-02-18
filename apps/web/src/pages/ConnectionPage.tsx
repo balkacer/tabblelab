@@ -286,9 +286,8 @@ export function ConnectionPage() {
         ) : null}
 
         <SavedConnectionsHeader
-          showForm={showForm}
           onReload={reloadProfiles}
-          onToggleForm={() => setShowForm((v) => !v)}
+          openAddConnectionForm={() => setShowForm(true)}
         />
 
         {effectiveSaved.length === 0 ? (

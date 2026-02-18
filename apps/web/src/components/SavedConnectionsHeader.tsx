@@ -2,13 +2,12 @@ import { useState } from "react"
 import { useAuthStore } from "../store/auth.store"
 
 export function SavedConnectionsHeader(props: {
-    showForm: boolean
     onReload: () => Promise<void>
-    onToggleForm: () => void
+    openAddConnectionForm: () => void
 }) {
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
     const [isReloadingProfiles, setIsReloadingProfiles] = useState(false)
-    const { showForm, onReload, onToggleForm } = props
+    const { onReload, openAddConnectionForm } = props
 
     const handleReload = () => {
         setIsReloadingProfiles(true)
@@ -34,10 +33,10 @@ export function SavedConnectionsHeader(props: {
                     <button
                         type="button"
                         className="text-xs rounded border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 px-2 py-1 text-neutral-200"
-                        onClick={onToggleForm}
+                        onClick={openAddConnectionForm}
                         title="Add a new connection"
                     >
-                        {showForm ? 'Close' : 'Add'}
+                        Add
                     </button>
                 </div>
             </div>
