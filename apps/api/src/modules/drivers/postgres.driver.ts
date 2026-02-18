@@ -67,6 +67,7 @@ export class PostgresDriver implements DatabaseDriver {
     async connect(): Promise<void> {
         this.pool = new Pool({
             ...this.config,
+            ssl: this.config.ssl ? { rejectUnauthorized: false } : false,
             max: 5,
         })
 

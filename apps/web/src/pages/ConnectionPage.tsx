@@ -26,6 +26,7 @@ function mapProfileRows(rows: any[]): SavedLike[] {
     database: String(r.database ?? ''),
     user: String(r.user ?? ''),
     isLocal: r.isLocal === true,
+    ssl: r.ssl === true,
   }))
 }
 
@@ -133,6 +134,7 @@ export function ConnectionPage() {
         port: Number(form.port),
         database: form.database.trim(),
         user: form.user.trim(),
+        ssl: form.ssl,
       }
 
       let connectionIdRes: { connectionId: string }
@@ -196,6 +198,7 @@ export function ConnectionPage() {
         port: Number(p.port),
         database: p.database,
         user: p.user,
+        ssl: p.ssl,
       }
 
       const res = await openConnectionFromLocal({
@@ -238,6 +241,7 @@ export function ConnectionPage() {
         port: Number(p.port),
         database: p.database,
         user: p.user,
+        ssl: p.ssl,
       } as any)
 
       renameProfileConnectionLocal(p.id, name)

@@ -9,4 +9,5 @@ export type SavedLike = {
     database: string
     user: string
     isLocal: boolean
+    ssl: boolean
 }
