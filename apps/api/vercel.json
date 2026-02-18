@@ -11,5 +11,10 @@
             "src": "/(.*)",
             "dest": "src/server.ts"
         }
-    ]
+    ],
+    "functions": {
+        "src/server.ts": {
+            "includeFiles": "../../packages/database-core/dist/**"
+        }
+    }
 }
