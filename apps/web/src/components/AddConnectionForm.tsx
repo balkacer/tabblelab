@@ -16,6 +16,7 @@ export function AddConnectionForm(props: {
         database: '',
         user: '',
         password: '',
+        ssl: false,
     })
 
     return (
@@ -138,6 +139,24 @@ export function AddConnectionForm(props: {
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
                     />
                 </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+                <input
+                    id="ssl"
+                    type="checkbox"
+                    checked={form.ssl}
+                    onChange={(e) =>
+                        setForm({
+                            ...form,
+                            ssl: e.target.checked,
+                        })
+                    }
+                    className="h-4 w-4 rounded border-neutral-700 bg-neutral-900 text-neutral-100 focus:ring-neutral-700"
+                />
+                <label htmlFor="ssl" className="text-xs text-neutral-400">
+                    Use SSL (required for most cloud databases)
+                </label>
             </div>
 
             <button
