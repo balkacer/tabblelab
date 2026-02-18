@@ -2,31 +2,26 @@
   "compilerOptions": {
     /* Language */
     "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "allowJs": false,
-
     /* Strictness */
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
-
     /* Interop */
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-
     /* Paths (important for monorepo) */
     "baseUrl": ".",
-    "paths": {
-      "@tabblelab/types": ["packages/types/src"],
-      "@tabblelab/database-core": ["packages/database-core/src"],
-      "@tabblelab/ui": ["packages/ui/src"]
-    }
   }
 }

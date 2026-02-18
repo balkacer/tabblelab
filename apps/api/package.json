@@ -2,9 +2,11 @@
   "name": "api",
   "version": "0.0.1",
   "private": true,
+  "main": "./dist/main.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/main.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node dist/main.js"
   },
   "keywords": [],
   "author": "",
