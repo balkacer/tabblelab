@@ -8,7 +8,7 @@
   "scripts": {
     "dev:api": "pnpm --filter api dev",
     "dev:web": "pnpm --filter web dev",
-    "build": "pnpm -r build",
+    "build": "pnpm -r --filter ./packages/** build && pnpm -r --filter ./apps/** build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
