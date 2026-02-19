@@ -49,12 +49,11 @@ export class PostgresDriver implements DatabaseDriver {
 
     private enforceSelectOnly(sql: string) {
         const kw = this.getFirstKeyword(sql)
-        if (kw !== 'select' && kw !== 'with') {
-            // WITH ... SELECT is allowed
+        if (kw !== 'select' && kw !== 'explain' && kw !== 'show' && kw !== 'describe' && kw !== 'values') {
             throw new ForbiddenException({
                 code: 'SAFE_MODE_BLOCKED',
                 action: 'AUTH_REQUIRED_FOR_UNSAFE_MODE',
-                message: 'Safe mode is enabled. Only SELECT statements are allowed.',
+                message: 'Safe mode is enabled. Only read-only statements are allowed.',
             })
         }
     }
@@ -62,6 +61,13 @@ export class PostgresDriver implements DatabaseDriver {
     private applyRowLimit(sql: string, limit: number) {
         const clean = this.normalizeSql(sql)
         return `SELECT * FROM (${clean}) AS __tabblelab_sub LIMIT ${limit}`
+    }
+
+    private isSafeToWrapReadQuery(sql: string) {
+        // Be conservative: ONLY wrap queries that are clearly read-only.
+        // NOTE: WITH can be used for INSERT/UPDATE/DELETE in Postgres, so we don't treat it as safe-to-wrap.
+        const k = this.getFirstKeyword(sql)
+        return ['select', 'show', 'describe', 'explain', 'values'].includes(k)
     }
 
     async connect(): Promise<void> {
@@ -87,6 +93,8 @@ export class PostgresDriver implements DatabaseDriver {
         rows: Record<string, any>[]
         rowCount: number
         executionTimeMs: number
+        type: 'result' | 'command'
+        command?: string
     }> {
         const started = Date.now()
 
@@ -108,29 +116,36 @@ export class PostgresDriver implements DatabaseDriver {
 
         const cleanSql = this.normalizeSql(sql)
 
-        if (safeMode) this.enforceSelectOnly(cleanSql)
+        if (safeMode) {
+            // Safe mode is strictly read-only
+            this.enforceSelectOnly(cleanSql)
+        }
 
-        const limitedSql = this.applyRowLimit(cleanSql, rowLimit)
+        const shouldWrap = this.isSafeToWrapReadQuery(cleanSql)
+        const sqlToExecute = shouldWrap ? this.applyRowLimit(cleanSql, rowLimit) : cleanSql
 
         const client = await this.pool.connect()
         const queryId = randomUUID()
 
         try {
-            // get pid and track
             const pidRes = await client.query<{ pid: number }>('SELECT pg_backend_pid() as pid')
             const pid = pidRes.rows[0]?.pid
             if (pid) this.activeQueries.set(queryId, { pid, startedAt: started })
 
             await client.query('BEGIN')
             await client.query(`SET LOCAL statement_timeout = ${timeoutMs}`)
-            const res = await client.query(limitedSql)
+            const res = await client.query(sqlToExecute)
             await client.query('COMMIT')
+
+            const isSelect = res.command === 'SELECT'
 
             return {
                 queryId,
-                columns: res.fields.map((f) => f.name),
-                rows: res.rows,
-                rowCount: res.rowCount ?? res.rows.length,
+                columns: isSelect ? res.fields.map((f) => f.name) : [],
+                type: isSelect ? 'result' : 'command',
+                command: res.command,
+                rowCount: res.rowCount ?? (isSelect ? res.rows.length : 0),
+                rows: isSelect ? res.rows : [],
                 executionTimeMs: Date.now() - started,
             }
         } catch (e) {
